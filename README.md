@@ -5,9 +5,10 @@ Twitter Sentiment Analysis
 
 0. Download and Install Python 2.7 or higher (if not installed)
 1. Run get-pip.py
-2. Create Twitter Developer Profile
-3. Create new app to get api and access keys
-4. In a Tweet Retriever Python file, add your keys to the appropriate variables at the top of the file
+2. Run "pip install oauth2" command in command line
+3. Create Twitter Developer Profile
+4. Create new app to get api and access keys
+5. In a Tweet Retriever Python file, add your keys to the appropriate variables at the top of the file
 
 UNIX/LINUX
 5. Ensure that the chosen Python Tweet Retriever and the bash file are in the same directory
