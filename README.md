@@ -11,11 +11,11 @@ Twitter Sentiment Analysis
 5. In a Tweet Retriever Python file, add your keys to the appropriate variables at the top of the file
 
 UNIX/LINUX
-5. Ensure that the chosen Python Tweet Retriever and the bash file are in the same directory
-6. Navigate to that directory using the command prompt
-7. Type './tweetRetrieve.sh' (without quotes)
-8. Enjoy all the information in the text files!!
+6. Ensure that the chosen Python Tweet Retriever and the bash file are in the same directory
+7. Navigate to that directory using the command prompt
+8. Type './tweetRetrieve.sh' (without quotes)
+9. Enjoy all the information in the text files!!
 
 Windows
-5. Recommended to  rum the Python file in Python's IDLE interface
-6. Unfortunately, you must manually restart the Python script each day to continue to collect data
+6. Recommended to  rum the Python file in Python's IDLE interface
+7. Unfortunately, you must manually restart the Python script each day to continue to collect data
