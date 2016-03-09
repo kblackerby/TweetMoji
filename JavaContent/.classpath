@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/Bukunmi/workspace/TweetMoji/JavaContent2/lib/icu4j-56_1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Bukunmi/workspace/TweetMoji/JavaContent2/lib/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Bukunmi/workspace/TweetMoji/JavaContent2/lib/poi-3.13-20150929.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Bukunmi/workspace/TweetMoji/JavaContent2/lib/poi-ooxml-3.13-20150929.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Bukunmi/workspace/TweetMoji/JavaContent2/lib/poi-ooxml-schemas-3.13-20150929.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Bukunmi/workspace/TweetMoji/JavaContent2/lib/poi-scratchpad-3.13-20150929.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Bukunmi/workspace/TweetMoji/JavaContent2/lib/twitter4j-core-4.0.4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Bukunmi/workspace/TweetMoji/JavaContent2/lib/xmlbeans-2.6.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Bukunmi/workspace/TweetMoji/JavaContent2/lib/icu4j-demos.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Bukunmi/workspace/TweetMoji/JavaContent2/lib/emoji4j-5.0.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
