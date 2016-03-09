@@ -3,19 +3,27 @@ package filemerger;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimerTask;
 
 /**
  * Created by Bukunmi on 2/14/2016.
  */
+
+/**
+ * Class provides system with proof that the directory reference exist
+ * Validate the file format and also
+ */
 public class FileValidation {
 
-    //checks the file directory exist
+    /**
+     *
+     * @param file
+     * @return
+     */
     public boolean checkDirectory(Path file){
+        //method checks the file directory exist
         if (Files.exists(file)){
             //Check what directory you are exactly
             System.out.println("File " + file.getFileName() + " Exist");
@@ -28,10 +36,16 @@ public class FileValidation {
         }
     }
 
-    //check unmerged files
-    public boolean checkFileNameExt(Path file) {
 
-        //check the kind is in good shape
+    /**
+     *
+     * @param file
+     * @return
+     */
+    public boolean checkFileNameExt(Path file) {
+        //method check unmerged files
+
+        //check the file is in good shape
         if (checkDirectory(file) || Files.isRegularFile(file) || Files.isReadable(file) || Files.isWritable(file)) {
 
             String fileNameExt;
@@ -68,8 +82,13 @@ public class FileValidation {
 
     }
 
-    //checkFileNameExt call this to verify file format after checking file extension
+    /**
+     *
+     * @param fileNameX
+     * @return
+     */
     private boolean fileFormat(String fileNameX) {
+        //method checkFileNameExt call this to verify file format after checking file extension
         String fileName;
         String fileDate;
         fileName = fileNameX.substring(0, fileNameX.lastIndexOf("_"));
@@ -92,8 +111,13 @@ public class FileValidation {
 
     }
 
-    //List the files present in a particular directory
+    /**
+     *
+     * @param directoryPath
+     * @return
+     */
     public File[] listFilesInDirectory(String directoryPath){
+        //List the files present in a particular directory
 
         File files;
         File[] paths;
@@ -108,8 +132,14 @@ public class FileValidation {
         return paths;
     }
 
-    //Check the file date is not today's
+    /**
+     *
+     * @param fileDate
+     * @return
+     */
     private boolean checkFileDate(String fileDate) {
+        //Method check if file name(date attached to file name)is not today's
+
         Date date = new Date();
 
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
