@@ -2,13 +2,13 @@
 ===
 Twitter Sentiment Analysis
 --
->>>NOTE:: THE BASH FILE IS INTENDED FOR UNIX/LINUX MACHINES ONLY.
+>>>NOTE:: THE BASH FILE IS INTENDED FOR UNIX/LINUX MACHINES ONLY.>>>
 1. TO Retrieve Tweets
-== 
+--
 - Download and Install Python 2.7 or higher (if not installed)
 - Run get-pip.py
 - Run "pip install oauth2" command in command line
->>>NOTE::
+>>>NOTE::>>>
 	For Windows, the command will look like "C:\Python27\Scripts\pip.exe install oauth2"
 - Create Twitter Developer Profile
 - Create new app to get api and access keys
