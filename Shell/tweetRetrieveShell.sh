@@ -21,7 +21,7 @@ python TexasTechTweetRetrieverPython.py >> /home/dmedinas/Documents/Tweets/DTwee
 echo "Generating Individual JSON Files for file DTweets_`date +%Y%m%d -d "yesterday"`"
 
 javac IndividualTweetGenerator.java
-java IndividualTweetGenerator Tweets/DTweets_`date +%Y%m%d -d`.json
+java IndividualTweetGenerator Tweets/DTweets_`date +%Y%m%d -d "yesterday"`.json
 
 echo ""
 echo ""
