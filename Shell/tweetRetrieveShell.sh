@@ -30,7 +30,7 @@ echo "Generated Individual JSON Files for file DTweets_`date +%Y%m%d -d "yesterd
 echo ""
 echo ""
 
-mv DTweets_`date +%Y%m%d -d "yesterday"` Individual_Tweets
+mv Tweets/DTweets_`date +%Y%m%d -d "yesterday"` Individual_Tweets
 
 fi
 
