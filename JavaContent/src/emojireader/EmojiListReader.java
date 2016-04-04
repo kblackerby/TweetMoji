@@ -1,11 +1,14 @@
 package emojireader;
 
+import emojisentimentanalysis.SentimentRankAssignement;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,59 +24,37 @@ public class EmojiListReader {
 
     /**
      * Method compared the input file line with the Excel Sheet list and extractthe emoji information
-     * @param EmojiFileNameStr
+     * @param emojiFileNameStr
      * @param transUniCode
      * @return Sting[] emojiData -> Code - Description - Tags - Sentiment Rank if it exist on the list
      * @throws IOException
      */
-    public String[] getEmojiDataByUniCode(String EmojiFileNameStr, String transUniCode) throws IOException {
+    public String[] getEmojiDataByUniCode(String emojiFileNameStr, String transUniCode) throws IOException {
 
-        HSSFSheet emojiSheet = openEmojiSheet(EmojiFileNameStr);
+        HSSFSheet emojiSheet = openEmojiSheet(emojiFileNameStr);
         //System.out.print("Compare UniCode  " + transUniCode);
         Row row;
 
         Iterator<Row> rowIterator = emojiSheet.iterator();
-        String uniNameStr;
-        String[] emojiData;
+        String[] emojiData = new String[0];
+
         while (rowIterator.hasNext()) {
             row = rowIterator.next();
-
             Cell uniCodeRow = row.getCell(1);
             String uniCodeVal = cellDataType(uniCodeRow);
-
-            //System.out.println("UniCode " + uniCodeVal);
 
             if (transUniCode.equalsIgnoreCase(uniCodeVal)) {
                 Cell emoji = row.getCell(1);
                 Cell name = row.getCell(2);
-                Cell tags = row.getCell(3);
-                Cell rank = row.getCell(4);
-                emojiData = new String[]{emoji.getStringCellValue(), name.getStringCellValue(),
-                        tags.getStringCellValue(), rank.getStringCellValue()};
-                //uniNameStr = uniName.getStringCellValue();
-                //System.out.println("\t Name Description: " + uniNameStr);
-                return emojiData;
+                Cell tags = row.getCell(4);
+                Cell rank = row.getCell(5);
+                emojiData = new String[]{cellDataType(emoji), cellDataType(name),
+                        cellDataType(tags), cellDataType(rank)};
             }
 
         }
-        return null;
-    }
-
-    /**
-     * Open the Excel Sheet with Emojis listed
-     * @param fileNameStr
-     * @return HSSFSheet open xls object
-     * @throws IOException
-     */
-    public HSSFSheet openEmojiSheet(String fileNameStr) throws IOException {
-        if(fileNameStr.equalsIgnoreCase("")){
-            System.out.println("No file selected");
-            return null;
-        }
-        FileInputStream fis = new FileInputStream(fileNameStr);
-        //Path fileName = Paths.get(fileNameStr);
-        HSSFWorkbook workbook = new HSSFWorkbook(new FileInputStream(fileNameStr));
-        return workbook.getSheetAt(0);
+        closeEmojiSheet(emojiFileNameStr);
+        return emojiData;
     }
 
     /**
@@ -86,6 +67,10 @@ public class EmojiListReader {
     public ArrayList<String[]> getEmojiDataListByUniCode(String emojFilleNameStr,
                                                          ArrayList<String> emojiCodeList) throws IOException {
         HSSFSheet emojiSheet = openEmojiSheet(emojFilleNameStr);
+        //Total List of Emojis in file
+        int lastRowNum = emojiSheet.getLastRowNum();
+        System.out.println("\nTotal Number of Rows " + lastRowNum);
+
         String[] emojiData;
         /**
          * emojiData[0] = emojiCode;
@@ -100,41 +85,99 @@ public class EmojiListReader {
             //emojiDataList is basically an array of emoji description form the excel file
             emojiData = getEmojiDataByUniCode(emojFilleNameStr, emojiCodeList.get(i));
             emojiDataList.add(emojiData);
+            System.out.println("Emoji Description "+ (i+1) +": "+emojiData[1]);
         }
-        //Total List of Emojis in file
-        int lastRowNum = emojiSheet.getLastRowNum();
-        System.out.println("\nTotal Number of Rows " + lastRowNum);
 
         return emojiDataList;
     }
 
-    private String cellDataType(Cell uniCodeRow) {
-        String uniCell = " ";
-        String uniCell2 = " ";
-        String uniCellVal = " ";
-        switch (uniCodeRow.getCellType()) {
+    public void assingSentimentRank(String emojiFileNameStr ) throws IOException {
+        HSSFSheet emojiSheet = openEmojiSheet(emojiFileNameStr);
+        Row row;
+        SentimentRankAssignement.init();
+        Iterator<Row> rowIterator = emojiSheet.iterator();
+        while (rowIterator.hasNext()) {
+            row = rowIterator.next();
+            Cell tags = row.getCell(4);
+            Cell ranks = row.getCell(5);
+            if (cellDataType(tags).isEmpty()) {
+                ranks.setCellValue(
+                        SentimentRankAssignement.findSentimentRank(cellDataType(tags)));
+            }
+        }
+        writeChangeToEmojiSheet(emojiFileNameStr);
+        closeEmojiSheet(emojiFileNameStr);
+        //return 1;
+    }
+
+    /**
+     * Open the Excel Sheet with Emojis listed
+     * @param fileNameStr
+     * @return HSSFSheet open xls object
+     * @throws IOException
+     */
+    private HSSFSheet openEmojiSheet(String fileNameStr) throws IOException {
+        if(fileNameStr.equalsIgnoreCase("")){
+            System.out.println("No file selected");
+            return null;
+        }
+        //Path fileName = Paths.get(fileNameStr);
+        HSSFWorkbook workbook = new HSSFWorkbook(
+                new FileInputStream(new File(fileNameStr)));
+        return workbook.getSheetAt(0);
+    }
+
+    /**
+     * closes the open Excel Sheet
+     * @param fileNameStr
+     * @throws IOException
+     */
+    private void closeEmojiSheet (String fileNameStr) throws IOException {
+        FileInputStream fis = new FileInputStream(fileNameStr);
+        fis.close();
+    }
+
+    /**
+     * write changes to the emoji file list
+     * @param fileNameStr
+     * @throws IOException
+     */
+    private void writeChangeToEmojiSheet (String fileNameStr) throws IOException {
+        closeEmojiSheet(fileNameStr);
+        FileOutputStream fos = new FileOutputStream(fileNameStr);
+
+        HSSFWorkbook workbook = openEmojiSheet(fileNameStr).getWorkbook();
+        workbook.write(fos);
+        fos.close();
+    }
+
+    /**
+     * Get return value of cell to String
+     * @param cellRow
+     * @return String cellStrVal
+     */
+    private String cellDataType(Cell cellRow) {
+        String cellVal = " ";
+        String cellStrVal = " ";
+        switch (cellRow.getCellType()) {
             case Cell.CELL_TYPE_NUMERIC:
-                uniCell = String.valueOf(uniCodeRow.getNumericCellValue());
-                uniCellVal = uniCell.substring(0, uniCell.lastIndexOf("."));
-                //System.out.println(uniCellVal);
+                cellVal = String.valueOf(cellRow.getNumericCellValue());
+                cellStrVal = cellVal.substring(0, cellVal.lastIndexOf("."));
+                //System.out.println(cellStrVal);
                 break;
 
             case Cell.CELL_TYPE_STRING:
-                uniCellVal = uniCodeRow.getStringCellValue();
-                /*if (uniCell2.startsWith("U+") || uniCell2.contains("U+")){
-                    uniCellVal = uniCell2.substring(uniCell2.lastIndexOf("+") + 1, uniCell2.length());
-                }*/
-                //System.out.println(uniCellVal);
+                cellStrVal = cellRow.getStringCellValue();
                 break;
 
             case Cell.CELL_TYPE_BLANK:
-                //System.out.println(uniCellVal);
+                //System.out.println(cellStrVal);
                 break;
 
             default:
-                //System.out.println(uniCodeRow.getStringCellValue());
+                //System.out.println(cellRow.getStringCellValue());
         }
-        return uniCellVal;
+        return cellStrVal;
     }
 
     public static void main(String[] args){

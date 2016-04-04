@@ -13,10 +13,10 @@ public class UnicodeEmojiSampler {
     /**
      * The method checks the string pattern of the tweet and returns the emoji code
      * @param inputCode
-     * @return ArrayList<String>
+     * @return ArrayList<String> matchedList
      */
     public static ArrayList<String> identifyEmojiCode(String inputCode) {
-        System.out.println("Original Input Code: "+inputCode);
+        System.out.println("Original Input String: "+inputCode);
 
         /**
          * Regular Expression checking for emojis, considering the different ranges of unicode representation of these emojis
@@ -73,35 +73,30 @@ public class UnicodeEmojiSampler {
         return getCorrectEmojiList(regionalIndicator, charCombo, variationSelector, heirarchy, matchList);
     }
 
-    public static ArrayList<String> getCorrectEmojiList(String regionalIndicator, String charCombo, String variationSelector, String heirarchy, ArrayList<String> matchList) {
+    /**
+     * Convert all other emoji unicodes to 32 bits
+     * @param regionalIndicator
+     * @param charCombo
+     * @param variationSelector
+     * @param heirarchy
+     * @param emojiList
+     * @return ArrayList<String> emojiList
+     */
+    public static ArrayList<String> getCorrectEmojiList(String regionalIndicator, String charCombo, String variationSelector, String heirarchy, ArrayList<String> emojiList) {
         /**
          * sortUnicode sorts and combine hierarchical emoji unicode
          */
-        ArrayList<String> uniCodeList = sortUnicodeList(regionalIndicator, heirarchy, charCombo, variationSelector, matchList);
-
-        //emoji directory
-        String  baseDir = System.getProperty("user.dir");
-        String emojiListFile = baseDir+"\\\\emojilist\\\\EmojiList.xls";
+        ArrayList<String> uniCodeList = sortUnicodeList(regionalIndicator, heirarchy, charCombo, variationSelector, emojiList);
 
         for(int i=0;i<uniCodeList.size();i++) {
             if (!(uniCodeList.get(i).startsWith("U+"))) {
                 uniCodeList.set(i, "U+" + Long.toHexString(uniCodeList.get(i).codePointAt(0)));
             }
         }
+        ShowEmojiDataList.showAllEmojiFromList("", emojiList);
+        System.out.println("There exist " + emojiList.size() + " Emoji(s) in this Tweet");
 
-        /*int i=1;
-        for (String uniCode : uniCodeList) {
-            System.out.println(i++ + ": " + uniCode);
-        }*/
-        System.out.println("There exist "+matchList.size()+" Emoji(s) in this Tweet");
-
-        EmojiListReader emojiListReader = new EmojiListReader();
-        try {
-            emojiListReader.getEmojiDataListByUniCode(emojiListFile,matchList);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return matchList;
+        return emojiList;
     }
 
     /**
