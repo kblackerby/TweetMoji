@@ -28,7 +28,7 @@ Windows
 
 3. Running The Emoji Code Conversion
 --
-- Open The "<b>ConvertEmojiUTFCode.java</b>" In the main Method, Replace the inputCode value to the new value
+- Open The "<b>UnicodeEmojiSampler.java</b>" In the main Method, Replace the inputCode value to the new value
 - Change The Address of your emojilist director to your current directory
 - Build Path/Open Library Setting and Import External Libray (found in the JavaContent/lib) ;
 	- poi-3.13-20150929.jar
