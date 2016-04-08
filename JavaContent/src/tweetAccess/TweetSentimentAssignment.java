@@ -1,4 +1,4 @@
-package sentimentanalysis;
+package tweetaccess;
 
 import emojireader.EmojiDataAccess;
 import emojireader.UnicodeEmojiSampler;
@@ -7,6 +7,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import sentimentanalysis.SentimentRankAssignement;
 
 import java.io.*;
 import java.util.ArrayList;
