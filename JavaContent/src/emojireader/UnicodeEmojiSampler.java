@@ -154,17 +154,21 @@ public class UnicodeEmojiSampler {
                         + " U+" + Long.toHexString(matchListFormat.get(i+1).codePointAt(0)));
                 matchListFormat.remove(i+1);
             }
-            int v  =i;
+            int v  = matchListFormat.size();
             //Remove unnecessary variationSelector
             if (matchListFormat.get(i).matches(variationSelector) &&
-                    !(matchListFormat.get(i+1).matches(heirarchy)) &&
-                    (matchListFormat.get(matchListFormat.size()-1).matches(variationSelector))){
-
-                      --i;
-                      matchListFormat.remove(i+1);
-
-
+                    (i == (matchListFormat.size()-1))){
+                i--;
+                matchListFormat.remove(i);
             }
+            else{
+                if(matchListFormat.get(i).matches(variationSelector) && !(matchListFormat.get(i+1).matches(heirarchy))){
+                    i--;
+                    matchListFormat.remove(i);
+                }
+            }
+
+
         }
         return matchListFormat;
     }
@@ -210,7 +214,7 @@ public class UnicodeEmojiSampler {
 
 
         String inputCode = "Strive for Honor, ever more. Long live the Matadors! " +
-              "\nHappy Birthday, Texas Tech, and thank you for 93 years of excellence. #GunsUp \ud83d\udd2b"
+              "\nHappy Birthday, Texas Tech, and thank you for 93 years of excellence. #GunsUp \ud83d\udd2b\ufe0f"
         +" \ud83d\udd2b\ud83d\udd34\u26ab\ufe0f";
         identifyEmojiCode(inputCode);
 
