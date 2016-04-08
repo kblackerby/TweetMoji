@@ -1,6 +1,6 @@
 package emojireader;
 
-import emojisentimentanalysis.SentimentRankAssignement;
+import sentimentanalysis.SentimentRankAssignement;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -17,10 +17,6 @@ import java.util.Iterator;
  * Created by Bukunmi on 2/28/2016.
  */
 public class EmojiListReader {
-
-    /*private String getEmojiListByDescription(String transCharset){
-        return "";
-    }*/
 
     /**
      * Method compared the input file line with the Excel Sheet list and extractthe emoji information
@@ -41,15 +37,16 @@ public class EmojiListReader {
         while (rowIterator.hasNext()) {
             row = rowIterator.next();
             Cell uniCodeRow = row.getCell(1);
-            String uniCodeVal = cellDataType(uniCodeRow);
+            String uniCodeVal = stringCellDataType(uniCodeRow);
 
             if (transUniCode.equalsIgnoreCase(uniCodeVal)) {
                 Cell emoji = row.getCell(1);
-                Cell name = row.getCell(2);
+                Cell desc = row.getCell(2);
+                Cell alias = row.getCell(3);
                 Cell tags = row.getCell(4);
                 Cell rank = row.getCell(5);
-                emojiData = new String[]{cellDataType(emoji), cellDataType(name),
-                        cellDataType(tags), cellDataType(rank)};
+                emojiData = new String[]{stringCellDataType(emoji), stringCellDataType(desc),
+                        stringCellDataType(alias), stringCellDataType(tags), stringCellDataType(rank)};
             }
 
         }
@@ -67,46 +64,80 @@ public class EmojiListReader {
     public ArrayList<String[]> getEmojiDataListByUniCode(String emojFilleNameStr,
                                                          ArrayList<String> emojiCodeList) throws IOException {
         HSSFSheet emojiSheet = openEmojiSheet(emojFilleNameStr);
-        //Total List of Emojis in file
-        int lastRowNum = emojiSheet.getLastRowNum();
-        System.out.println("\nTotal Number of Rows " + lastRowNum);
 
         String[] emojiData;
         /**
          * emojiData[0] = emojiCode;
          * emojiData[1] = emojiDescription;
-         * emojiData[2] = emojiTags;
-         * emojiData[3] = emojiSentiment;
+         * emojiData[2] = emojiAlias;
+         * emojiData[3] = emojiTags;
+         * emojiData[4] = emojiSentiment;
          */
         ArrayList<String[]> emojiDataList = new ArrayList<>();
 
+        double sumRank = 0;
         for (int i = 0; i < emojiCodeList.size(); i++) {
             emojiCodeList.get(i);
             //emojiDataList is basically an array of emoji description form the excel file
             emojiData = getEmojiDataByUniCode(emojFilleNameStr, emojiCodeList.get(i));
             emojiDataList.add(emojiData);
-            System.out.println("Emoji Description "+ (i+1) +": "+emojiData[1]);
+            System.out.println((i+1) +") - Emoji Code: "+ emojiCodeList.get(i) +" - Description: "+ ": "
+                    + emojiData[1] +" - Score: "+emojiData[4]);
+            sumRank += new Double(emojiData[4]);
         }
+
+        //Total List of Emojis in file
+        int lastRowNum = emojiSheet.getLastRowNum();
+        System.out.println("\nTotal Number of Emojis in list " + lastRowNum);
 
         return emojiDataList;
     }
 
+    /**
+     * Assigns Sentiment Score to List of Emojis where there is no value initially assigned.
+     * @param emojiFileNameStr
+     * @throws IOException
+     */
     public void assingSentimentRank(String emojiFileNameStr ) throws IOException {
-        HSSFSheet emojiSheet = openEmojiSheet(emojiFileNameStr);
+        if(emojiFileNameStr.equalsIgnoreCase("")){
+            System.out.println("No file selected");
+            return;
+        }
+        HSSFWorkbook workbook = new HSSFWorkbook(
+                new FileInputStream(new File(emojiFileNameStr)));
+        HSSFSheet emojiSheet = workbook.getSheetAt(0);
         Row row;
         SentimentRankAssignement.init();
         Iterator<Row> rowIterator = emojiSheet.iterator();
         while (rowIterator.hasNext()) {
             row = rowIterator.next();
+            Cell desc = row.getCell(2);
+            Cell alias = row.getCell(3);
             Cell tags = row.getCell(4);
             Cell ranks = row.getCell(5);
-            if (cellDataType(tags).isEmpty()) {
-                ranks.setCellValue(
-                        SentimentRankAssignement.findSentimentRank(cellDataType(tags)));
+            String val = stringCellDataType(ranks);
+            String val2 = stringCellDataType(tags);
+
+
+            if (stringCellDataType(ranks) == " "
+                    && !(stringCellDataType(tags) == " ")
+                    && !(stringCellDataType(desc) == " ")) {
+                //average the sentimentRank for the emoji from the emojiDescription and the Annoteded tags
+                double aveRank = (new Double(SentimentRankAssignement.findSentimentRank(stringCellDataType(desc)))
+                                 + new Double(SentimentRankAssignement.findSentimentRank(stringCellDataType(alias)))
+                                 + new Double(SentimentRankAssignement.findSentimentRank(stringCellDataType(tags))))/3 ;
+                ranks.setCellValue(aveRank);
+                //ranks.setCellValue(
+                        //SentimentRankAssignement.findSentimentRank(stringCellDataType(tags)));
+
             }
+
         }
-        writeChangeToEmojiSheet(emojiFileNameStr);
+        FileOutputStream fos = new FileOutputStream(new File(emojiFileNameStr));
+
+        workbook.write(fos);
         closeEmojiSheet(emojiFileNameStr);
+        fos.close();
         //return 1;
     }
 
@@ -138,31 +169,16 @@ public class EmojiListReader {
     }
 
     /**
-     * write changes to the emoji file list
-     * @param fileNameStr
-     * @throws IOException
-     */
-    private void writeChangeToEmojiSheet (String fileNameStr) throws IOException {
-        closeEmojiSheet(fileNameStr);
-        FileOutputStream fos = new FileOutputStream(fileNameStr);
-
-        HSSFWorkbook workbook = openEmojiSheet(fileNameStr).getWorkbook();
-        workbook.write(fos);
-        fos.close();
-    }
-
-    /**
      * Get return value of cell to String
      * @param cellRow
      * @return String cellStrVal
      */
-    private String cellDataType(Cell cellRow) {
-        String cellVal = " ";
+    private String stringCellDataType(Cell cellRow) {
         String cellStrVal = " ";
         switch (cellRow.getCellType()) {
             case Cell.CELL_TYPE_NUMERIC:
-                cellVal = String.valueOf(cellRow.getNumericCellValue());
-                cellStrVal = cellVal.substring(0, cellVal.lastIndexOf("."));
+                cellStrVal = String.valueOf(cellRow.getNumericCellValue());
+                //cellStrVal = cellVal.substring(0, cellVal.lastIndexOf("."));
                 //System.out.println(cellStrVal);
                 break;
 
@@ -180,26 +196,4 @@ public class EmojiListReader {
         return cellStrVal;
     }
 
-    public static void main(String[] args){
-      /*  String fileNameString = "C:\\Users\\Bukunmi\\workspace\\TweetMoji\\JavaContent\\emojilist\\EmojiList.xls";
-        Path fileName2 = Paths.get(fileNameString);
-        File fileName = new File(fileNameString);
-
-        ConvertEmojiUTFCode converter = new ConvertEmojiUTFCode();
-
-        FileValidation fileValidation = new FileValidation();
-        EmojiListReader emojiListReader = new EmojiListReader();
-
-
-        if((fileValidation.checkDirectory(fileName2))){
-            try {
-                //System.out.println(fileName.toString());
-                emojiListReader.getEmojiDataByUniCode(fileName.toString(), "");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }*/
-
-}
 }

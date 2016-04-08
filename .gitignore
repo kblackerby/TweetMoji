@@ -4,9 +4,7 @@ JavaContent/JavaContent.iml
 JavaContent/TweetMoji.iml
 JavaContent/SampleTweetMerge
 JavaContent/JavaContent.iml
-JavaContent/src/filemerger/RenamedRunMergerTask.java
 JavaContent/NetBean Project/nbproject/private/
-Libraries/*
 individualTweetsDaniel/*
 IndividualTweetGenerator.java
 JavaContent/emojilist/emojiSample.txt
@@ -16,4 +14,4 @@ JavaContent/lib/emoji-java-3.0.0.jar
 JavaContent/emojilist/emojiSample.txt
 JavaContent/lib/stanford-english-corenlp-2016-01-10-models.jar
 JavaContent/lib/slf4j-api-1.7.9.jar
-JavaContent/lib/StanfordNLP/*
+JavaContent/lib/StanfordNLP/

@@ -16,7 +16,7 @@ public class UnicodeEmojiSampler {
      * @return ArrayList<String> matchedList
      */
     public static ArrayList<String> identifyEmojiCode(String inputCode) {
-        System.out.println("Original Input String: "+inputCode);
+        System.out.println("Original Input String to retrieve emojis: "+inputCode +"\n");
 
         /**
          * Regular Expression checking for emojis, considering the different ranges of unicode representation of these emojis
@@ -66,8 +66,10 @@ public class UnicodeEmojiSampler {
         Matcher matcher = pattern.matcher(string1);
         ArrayList<String> matchList = new ArrayList<String>();
 
+
         while (matcher.find()) {
             matchList.add(matcher.group());
+
         }
 
         return getCorrectEmojiList(regionalIndicator, charCombo, variationSelector, heirarchy, matchList);
@@ -93,7 +95,7 @@ public class UnicodeEmojiSampler {
                 uniCodeList.set(i, "U+" + Long.toHexString(uniCodeList.get(i).codePointAt(0)));
             }
         }
-        ShowEmojiDataList.showAllEmojiFromList("", emojiList);
+        //EmojiDataAccess.showAllEmojiFromList(emojiList);
         System.out.println("There exist " + emojiList.size() + " Emoji(s) in this Tweet");
 
         return emojiList;
@@ -163,7 +165,7 @@ public class UnicodeEmojiSampler {
     }
 
     public static void main(String[] args) {
-        String inputCode = "What it looks like to rush the court!!!!!!\n" +
+        String inputCode = "What it looks like to rush the court!!!!! " +
                 "\uD83D\uDE00" +
                 "\uD83D\uDE31" + //1
                 "\uD83C\uDF8A" + //2
@@ -200,10 +202,10 @@ public class UnicodeEmojiSampler {
                 "\u200D" +
                 "\uD83D\uDC69" ;  //19
 
-        // analyzing the string */
-        //String inputCode = "Strive for Honor, ever more. Long live the Matadors! " +
-          //      "\nHappy Birthday, Texas Tech, and thank you for 93 years of excellence. #GunsUp \u2764\ufe0f\ud83d\udd2b";
 
+
+        //String inputCode = "Strive for Honor, ever more. Long live the Matadors! " +
+        //      "\nHappy Birthday, Texas Tech, and thank you for 93 years of excellence. #GunsUp \u2764\ufe0f\ud83d\udd2b";
         identifyEmojiCode(inputCode);
 
     }

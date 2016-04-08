@@ -28,12 +28,30 @@ Windows
 
 3. Running The Emoji Code Conversion
 --
-- Open The "<b>UnicodeEmojiSampler.java</b>" In the main Method, Replace the inputCode value to the new value
-- Change The Address of your emojilist director to your current directory
-- Build Path/Open Library Setting and Import External Libray (found in the JavaContent/lib) ;
+- Open The "<b>UnicodeEmojiSampler.java</b>" In the main method, Replace the inputString value to the new value
+- Change The path to your emojilist director to your current directory (Change accordingly)
+- Build Path/Open Library Setting and Import External Library (found in the JavaContent/lib) ;
 	- poi-3.13-20150929.jar
 	- poi-ooxml-3.13-20150929.jar
 	- poi-ooxml-schemas-3.13-20150929.jar
 	- poi-ooxml-scratchpad-3.13-20150929.jar
 	- xmlbeans-2.6.0.jar
 	These Libraries enable you to Read and Write to an Excel file.
+
+4. Running the Sentiment Ranking - Assignment
+--
+- Open the "<b>TweetSentimentAssignment.java</b>" In the main method, Replace the inputString value to the curent directoy with the Tweets, 
+- Change The path to your individual tweet director to the actual directory (Change accordingly)
+- Build Path/Open Library Setting and import the following External Library (found in the JavaContent/lib) ;
+	- The StanfordNLP
+		- ejml-0.23.jar
+		- slf4j-api.jar
+		- slf4j-simple.jar
+		- stanford-corenlp-3.6.0.jar
+		- stanford-corenlp-3.6.0-models.jar
+		- xom.jar
+	These Libraries enable you to Use StanfordNLP for sentiment analysis
+	- JSON parsing
+	 - json-simple-1.1.1.jar
+	These Library enable you work with json object.
+

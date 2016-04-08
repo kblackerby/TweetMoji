@@ -1,6 +1,7 @@
 package filemerger;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
@@ -124,10 +125,16 @@ public class FileValidation {
 
         files = new File(directoryPath);
 
-        // return  pathname to files in directory
-        paths = files.listFiles();
-        System.out.println("Reading File List");
-        System.out.println(paths);
+        // return  only files with .json extensions in directory
+        paths = files.listFiles(
+                new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith("json");
+            }
+        });
+        System.out.println("Reading File List: "+ paths.length+" in Directory");
+        //System.out.println(paths);
 
         return paths;
     }
