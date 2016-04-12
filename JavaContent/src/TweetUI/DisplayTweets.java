@@ -1,3 +1,6 @@
+// --- Change the package to integrate into the other pieces *******
+package displaytweets;
+
 /*
  * Copyright 2007 Yusuke Yamamoto
  *
@@ -13,78 +16,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package displaytweets;
-
-import java.awt.Component;
-import java.io.*;
-import javax.swing.Box;
-import javax.swing.JFrame;
-import static javax.swing.JFrame.*;
-import javax.swing.JPanel;
-import twitter4j.Status;
-import twitter4j.TwitterException;
-import twitter4j.TwitterObjectFactory;
 
 /**
  *
- * @author Kenan
+ * @author Kenan Blackerby
  * 
  * This is a test program that demonstrates how to display the tweets
  */
 
+import java.io.*;
+import javax.swing.Box;
+import javax.swing.JFrame;
+import static javax.swing.JFrame.*;
+import twitter4j.Status;
+import twitter4j.TwitterException;
+import twitter4j.TwitterObjectFactory;
+
 public class DisplayTweets {
 
- 
     /**
      * @param args the command line arguments
      */
      public static void main(String[] args) {
         try {
             // Create a Frame --- FOR TEST *****
-            JFrame tweet = new JFrame();
-            tweet.setDefaultCloseOperation(EXIT_ON_CLOSE);
+            JFrame tweetList = new JFrame();
+            tweetList.setDefaultCloseOperation(EXIT_ON_CLOSE);
             
             // Container Box for the tweet panels to go in (Display Vertically)
             Box contain = Box.createVerticalBox();
             
-            // Get the JSON files frem the Tweets folder --- FOR TEST *****
-            File[] files = new File("Tweets").listFiles((File dir, String name) -> name.endsWith(".json"));
+            // Get the JSON files frem the Tweets folder --- REPLACE WITH SEARCH RESULT *******
+            File[] files = new File("C:\\\\Users\\\\Kenan\\\\Documents\\\\School"
+                    +"\\\\ECE Classes\\\\Info Retrieval\\\\displayTweets\\\\Tweets")
+                    .listFiles((File dir, String name) -> name.endsWith(".json"));
             
             // Iterate through the files, displaying the tweets
             for (File file : files) {
                 // Create Status Object from the file
                 String rawJSON = readFirstLine(file);
-                Status status = TwitterObjectFactory.createStatus(rawJSON);
-                // Get the username, screen name, and text for the tweet
-                String uname = status.getUser().getName();
-                String sname = status.getUser().getScreenName();
-                String tweetText = status.getText();
-                
-                // Print the tweet in the Console --- FOR TEST *****
-                System.out.println("@" + sname + " - " + tweetText);
-                
-                // Check for retweet and stack retweets accordingly
-                Status retweet = status.getRetweetedStatus();
-                boolean rTflag = false;
-                if(null != retweet) {
-                    rTflag = true;
-                }
-                // Create the Tweet Status Object 
-                if(rTflag == true) {
-                    JPanel retweetStat = makeRetweet(retweet);
-                }
-                else {
-                    TweetStatus stat = new TweetStatus(uname, sname, tweetText);
-                    contain.add(stat);
-                }
-                
-                
-                
+                Status tweet = TwitterObjectFactory.createStatus(rawJSON);              
+       
+                TweetStatus stat = new TweetStatus(tweet);
+                contain.add(stat);
             }
-            tweet.add(contain);
-            tweet.pack();
-            tweet.setVisible(true);
+            tweetList.add(contain);
+            tweetList.pack();
+            tweetList.setVisible(true);
             
+          // Exceptions if errors in getting tweets
         } catch (IOException ioe) {
             System.out.println("Failed to store tweets: " + ioe.getMessage());
         } catch (TwitterException te) {
@@ -93,32 +73,7 @@ public class DisplayTweets {
         }
     }
     
-    private static TweetStatus makeRetweet(Status tweet) {
-        if(tweet == null)
-            return null;
-        else {
-            // Get the username, screen name, and text for the tweet
-            String uname = tweet.getUser().getName();
-            String sname = tweet.getUser().getScreenName();
-            String tweetText = tweet.getText();
-
-            // Print the tweet in the Console --- FOR TEST *****
-            System.out.println("@" + sname + " - " + tweetText);
-
-            TweetStatus rTstat = makeRetweet(tweet.getRetweetedStatus());
-            boolean rTflag = false;
-            if(rTstat != null)
-                rTflag = true;
-
-            TweetStatus stat = new TweetStatus(uname, sname, tweetText);
-
-            if(rTflag == true)
-                stat.add(rTstat);
-
-            return stat;
-            }
-    }
-     
+    // method to retrieve the tweets from the files (UTF-8 format)
     private static String readFirstLine(File fileName) throws IOException {
         FileInputStream fis = null;
         InputStreamReader isr = null;
