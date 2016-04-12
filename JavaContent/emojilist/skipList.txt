@@ -1,0 +1,6 @@
+(Almost) all of the Fitzpatrick modified emojis
+Combinations including the "U+200D" in their sequence (Like the extras for the kissing couples and the family pictures)
+
+These can be added later with a look-ahead (regular expression)
+
+ 
