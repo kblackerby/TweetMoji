@@ -54,7 +54,7 @@ public class TweetStatus extends javax.swing.JPanel {
                 // Add substring to the statusText panel
                 jPanel1.add(new JLabel(textList.get(i).substring(4)));
             else {
-                jPanel1.add(new JLabel(new javax.swing.ImageIcon(getClass().getResource("/displaytweets/twitter_logo.png")))); // NOI18N
+                jPanel1.add(new JLabel(new javax.swing.ImageIcon(getClass().getResource("/displaytweets/twitter_logo.png"))));
             }
         }
         
@@ -97,14 +97,12 @@ public class TweetStatus extends javax.swing.JPanel {
         
         // Repeat to the end of the List
         for (int i = 0; i < textList.size(); i++) {
-            javax.swing.JLabel temp = new JLabel();
             if(textList.get(i).startsWith("TEXT"))
                 // Add substring to the statusText panel
-                temp.setText(textList.get(i).substring(4));
+                jPanel1.add(new JLabel(textList.get(i).substring(4)));
             else {
-                temp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/displaytweets/twitter_logo.png"))); // NOI18N
+                jPanel1.add(new JLabel(new javax.swing.ImageIcon(getClass().getResource("/displaytweets/twitter_logo.png"))));
             }
-            jPanel1.add(temp);
         }
         
         try {
@@ -205,27 +203,24 @@ public class TweetStatus extends javax.swing.JPanel {
                         .addComponent(profile)
                         .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(screenname)
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(screenname)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(username)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(retweet))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(retweetPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(date)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(Location)))
-                                .addGap(150, 150, 150))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addComponent(twicon, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addContainerGap(28, Short.MAX_VALUE))))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addGroup(layout.createSequentialGroup()
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(retweetPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(layout.createSequentialGroup()
+                                    .addComponent(date)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                    .addComponent(Location)))
+                            .addGap(150, 150, 150))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(twicon, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

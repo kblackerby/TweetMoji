@@ -24,7 +24,13 @@ package displaytweets;
  * This is a test program that demonstrates how to display the tweets
  */
 
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.awt.GraphicsEnvironment;
 import java.io.*;
+import java.nio.charset.Charset;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Box;
 import javax.swing.JFrame;
 import static javax.swing.JFrame.*;

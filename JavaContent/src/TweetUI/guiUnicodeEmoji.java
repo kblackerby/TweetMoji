@@ -80,16 +80,16 @@ public class guiUnicodeEmoji {
             }
         }
 
-        return getCorrectEmojiList(regionalIndicator, charCombo, variationSelector, heirarchy, matchList);
+        return getCorrectEmojiList(regionalIndicator, charCombo, variationSelector, heirarchy, fitzpatrickSupport, matchList);
         
         
     }
 
-    public static ArrayList<String> getCorrectEmojiList(String regionalIndicator, String charCombo, String variationSelector, String heirarchy, ArrayList<String> matchList) {
+    public static ArrayList<String> getCorrectEmojiList(String regionalIndicator, String charCombo, String variationSelector, String heirarchy, String fitzpatrickSupport, ArrayList<String> matchList) {
         /**
          * sortUnicode sorts and combine hierarchical emoji unicode
          */
-        sortUnicodeList(regionalIndicator, heirarchy, charCombo, variationSelector, matchList);
+        sortUnicodeList(regionalIndicator, heirarchy, charCombo, variationSelector, fitzpatrickSupport, matchList);
 
         //emoji directory
         String  baseDir = System.getProperty("user.dir");
@@ -105,7 +105,7 @@ public class guiUnicodeEmoji {
         for (String uniCode : uniCodeList) {
             System.out.println(i++ + ": " + uniCode);
         }*/
-        System.out.println("There exist "+matchList.size()+" Emoji(s) in this Tweet");
+        System.out.println("There exist "+matchList.size()+" Emojis and Text Snippets in this Tweet");
         
         
         for (int i = 0; i < matchList.size(); i++) {
@@ -116,7 +116,7 @@ public class guiUnicodeEmoji {
     }
 
     /**
-     * The method identifies multiple-emoji-unicode representations and resize array gooten from the inputed String
+     * The method identifies multiple-emoji-unicode representations and resize array gotten from the inputed String
      * @param regionalIndicator
      * @param heirarchy
      * @param charCombo
@@ -125,13 +125,13 @@ public class guiUnicodeEmoji {
      * @return
      */
     public static ArrayList<String> sortUnicodeList(String regionalIndicator, String heirarchy, String charCombo,
-                                                    String variationSelector, ArrayList<String> matchListFormat) {
+                                                    String variationSelector, String fitzpatrickSupport, ArrayList<String> matchListFormat) {
         for(int i=0;i<matchListFormat.size();i++) {
 
             //matchlist is Character Diacritical
             if (matchListFormat.get(i).endsWith(charCombo)) {
                 matchListFormat.set(i, "U+00" + Long.toHexString(matchListFormat.get(i).codePointAt(0))
-                        + " U+" + Long.toHexString(charCombo.codePointAt(0)));
+                        + "U+" + Long.toHexString(charCombo.codePointAt(0)));
             }
 
             //matchlist is of Heirarchy
@@ -171,6 +171,12 @@ public class guiUnicodeEmoji {
 
             //Remove unnecessary variationSelector
             if (matchListFormat.get(i).matches(variationSelector) && !(matchListFormat.get(i+1).matches(heirarchy)) ){
+                i--;
+                matchListFormat.remove(i+1);
+            }
+            
+            // matchlist is fitzpatrick (NOT DISPLAYING FITZPATRICK, THE ORIGINAL IS USED FOR TIME SAKE)
+            if (matchListFormat.get(i).matches(fitzpatrickSupport)) {
                 i--;
                 matchListFormat.remove(i+1);
             }
