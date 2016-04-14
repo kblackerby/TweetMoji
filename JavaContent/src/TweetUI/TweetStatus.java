@@ -60,7 +60,21 @@ public class TweetStatus extends javax.swing.JPanel {
                 // Add substring to the statusText panel
                 jPanel1.add(new JLabel(textList.get(i).substring(4)));
             else {
-                jPanel1.add(new JLabel(new javax.swing.ImageIcon(getClass().getResource("/displaytweets/twitter_logo.png"))));
+                int iconHeight = 20, iconWidth = 20;
+                // NOTE: Change the file address based on final build structure ---
+                BufferedImage img;
+                try {
+                    img = ImageIO.read(new File("C:/Users/Kenan/Documents/School"
+                    +"/ECE Classes/Info Retrieval/TweetMoji/JavaContent/emojilist/Pics/"
+                                                +textList.get(i).replace("U+", "")+".jpg"));
+                } catch (IOException e) {
+                    img = new BufferedImage(iconWidth, iconHeight, BufferedImage.TYPE_3BYTE_BGR);
+                }
+                if (img.getHeight() < img.getWidth())
+                    iconHeight = -1;
+                else if (img.getHeight() > img.getWidth())
+                    iconWidth = -1;
+                jPanel1.add(new JLabel(new javax.swing.ImageIcon(img.getScaledInstance(iconWidth, iconHeight, Image.SCALE_SMOOTH))));
             }
         }
         
@@ -91,7 +105,6 @@ public class TweetStatus extends javax.swing.JPanel {
         String tweetText = retweeted.getText();
         username_r.setText(retweeted.getUser().getName());
         screenname_r.setText(retweeted.getUser().getScreenName());
-       // StatusText.setText(retweeted.getText());
 
         // Print the tweet in the Console --- FOR TEST *****
         System.out.println("@" + retweeted.getUser().getScreenName() + " - " + tweetText);
