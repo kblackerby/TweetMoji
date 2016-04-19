@@ -1,7 +1,14 @@
 package tweetaccess;
 
+import edu.stanford.nlp.util.CollectionUtils;
+
 import java.io.File;
 import java.io.FilenameFilter;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by Bukunmi on 2/14/2016.
@@ -15,56 +22,47 @@ public class FileValidation {
 
     /**
      *
-     * @param file
-     * @return
-     */
-    public File[] checkDirectory(String file){
-        //method checks the file directory exist
-        File name = new File(file);
-        //if this is a directory, open it and list the files in the directory
-
-        if (name.isDirectory()){
-            return listFilesInDirectory(file);
-
-        }
-        //else return the files in the
-        else return listFilesInDirectory(file);
-
-        /*if (Files.exists(file)){
-            //Check what directory you are exactly
-            System.out.println("File " + file.getFileName() + " Exist");
-            return true;
-        }
-        else {
-            System.out.println("The Selected file doesn't Exist.");
-            return false;
-        }*/
-    }
-
-    /**
-     *
      * @param directoryPath
      * @return
      */
-    public File[] listFilesInDirectory(String directoryPath){
+    public ArrayList<File> listFilesInDirectory(String directoryPath){
         //List the files present in a particular directory
 
-        File files;
-        File[] paths;
+        File parentDir;
+        File[] fileName;
+        File[] childDir;
+        ArrayList<File> paths = new ArrayList<>();
 
+        parentDir = new File(directoryPath);
+        //for every file/folder in directory if the file is a directory, read form the folder
+        // and return the file path as String
+        for (File file: parentDir.listFiles()){
+            if(file.isDirectory()){
+                System.out.println("Available Directory - "+file.getName());
+                childDir = file.listFiles(
+                        new FilenameFilter() {
+                            @Override
+                            public boolean accept(File dir, String name) {
+                                return name.endsWith("json");
+                            }
+                        });
+                Collections.addAll(paths, childDir);
+                }
+        }
 
-        files = new File(directoryPath);
-
-        // return  only files with .json extensions in directory
-        paths = files.listFiles(
+        fileName = parentDir.listFiles(
                 new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.endsWith("json");
-            }
-        });
-        System.out.println("Reading File List: "+ paths.length+" in Directory");
-        //System.out.println(paths);
+                    @Override
+                    public boolean accept(File dir, String name) {
+                        if (!new File(name).isDirectory()){
+                            return false;
+                        }
+                        return name.endsWith("json");
+                    }
+                });
+        Collections.addAll(paths, fileName);
+
+        System.out.println("Reading File List: "+ paths.size()+" in Directory");
 
         return paths;
     }
@@ -72,24 +70,13 @@ public class FileValidation {
     public static void main(String[] args) {
 
         //main method was used to test FileValidation class
-        String homePath = System.getProperty("User dir");
-        String extractedFilePath = "\\ParsedMerged";//\\Tweets
-        String rawFilePath = "\\unParsed";//\\Tweets
-
-        String extractedFile = homePath+extractedFilePath+"\\file3.txt";
-        //String rawFile = homePath+rawFilePath+"\\file_02142016.txt";
-        String rawFile = homePath+rawFilePath+"\\KTweetFeeds_20160215.txt";
+        String baseDir = System.getProperty("user.dir");
+        String tweetDir = baseDir + "\\resources\\IndividualTweetsDaniel";
 
 
         FileValidation fileValidation = new FileValidation();
-        //fileValidation.checkFileNameExt(Paths.get(rawFile));
+        fileValidation.listFilesInDirectory(tweetDir);
 
-        int  i = 0;
-        for (File filepath :
-                fileValidation.listFilesInDirectory(homePath+rawFilePath)) {
-            i += 1;
-            String filename = filepath.getName();
-        }
 
     }
 }

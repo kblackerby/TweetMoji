@@ -1,5 +1,7 @@
 package emojireader;
 
+import sentimentanalysis.SentimentRankAssignement;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -96,7 +98,7 @@ public class UnicodeEmojiSampler {
             }
         }
         //EmojiDataAccess.showAllEmojiFromList(emojiList);
-        System.out.println("There exist " + emojiList.size() + " Emoji(s) in this Tweet");
+        System.out.println("There exist " + emojiList.size() + " Emoji(2) Similar Unicodes in this Tweet");
 
         return emojiList;
     }
@@ -154,7 +156,7 @@ public class UnicodeEmojiSampler {
                         + " U+" + Long.toHexString(matchListFormat.get(i+1).codePointAt(0)));
                 matchListFormat.remove(i+1);
             }
-            int v  = matchListFormat.size();
+
             //Remove unnecessary variationSelector
             if (matchListFormat.get(i).matches(variationSelector) &&
                     (i == (matchListFormat.size()-1))){
@@ -164,7 +166,7 @@ public class UnicodeEmojiSampler {
             else{
                 if(matchListFormat.get(i).matches(variationSelector) && !(matchListFormat.get(i+1).matches(heirarchy))){
                     i--;
-                    matchListFormat.remove(i);
+                    matchListFormat.remove(i+1);
                 }
             }
 
@@ -213,10 +215,13 @@ public class UnicodeEmojiSampler {
 
 
 
-        String inputCode = "Strive for Honor, ever more. Long live the Matadors! " +
-              "\nHappy Birthday, Texas Tech, and thank you for 93 years of excellence. #GunsUp \ud83d\udd2b\ufe0f"
-        +" \ud83d\udd2b\ud83d\udd34\u26ab\ufe0f";
+        String inputCode = "home is where you put your guns up \ud83d\udd2b\u2b06\ufe0f\u2764\ufe0f #WreckEm #TTU20 " +
+                "https:\\/\\/t.co\\/Lq96li43TD";
+
         identifyEmojiCode(inputCode);
+
+        SentimentRankAssignement.init();
+        SentimentRankAssignement.findSentimentRank(inputCode);
 
     }
 }

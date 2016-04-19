@@ -25,6 +25,7 @@ public class SentimentRankAssignement {
 
 
     public static double findSentimentRank(String inputString) {
+        System.out.println("Sentiment Value Assignment");
 
         int subTotalSentiment = 0;
         double mainSentiment = 0;
@@ -41,7 +42,7 @@ public class SentimentRankAssignement {
                 if (partText.length() > longest) {
                     numIteration++;
                     subTotalSentiment += sentiment;
-                    longest = partText.length();
+                    //longest = partText.length();
                     System.out.println(sentiment + " " + partText);
                 }
 
