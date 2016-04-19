@@ -7,8 +7,14 @@ package displaytweets;
  */
 
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import javax.imageio.ImageIO;
 import javax.swing.JLabel;
 import twitter4j.Status;
 
@@ -54,7 +60,21 @@ public class TweetStatus extends javax.swing.JPanel {
                 // Add substring to the statusText panel
                 jPanel1.add(new JLabel(textList.get(i).substring(4)));
             else {
-                jPanel1.add(new JLabel(new javax.swing.ImageIcon(getClass().getResource("/displaytweets/twitter_logo.png"))));
+                int iconHeight = 20, iconWidth = 20;
+                // NOTE: Change the file address based on final build structure ---
+                BufferedImage img;
+                try {
+                    img = ImageIO.read(new File("C:/Users/Kenan/Documents/School"
+                    +"/ECE Classes/Info Retrieval/TweetMoji/JavaContent/emojilist/Pics/"
+                                                +textList.get(i).replace("U+", "")+".jpg"));
+                } catch (IOException e) {
+                    img = new BufferedImage(iconWidth, iconHeight, BufferedImage.TYPE_3BYTE_BGR);
+                }
+                if (img.getHeight() < img.getWidth())
+                    iconHeight = -1;
+                else if (img.getHeight() > img.getWidth())
+                    iconWidth = -1;
+                jPanel1.add(new JLabel(new javax.swing.ImageIcon(img.getScaledInstance(iconWidth, iconHeight, Image.SCALE_SMOOTH))));
             }
         }
         
@@ -85,7 +105,6 @@ public class TweetStatus extends javax.swing.JPanel {
         String tweetText = retweeted.getText();
         username_r.setText(retweeted.getUser().getName());
         screenname_r.setText(retweeted.getUser().getScreenName());
-       // StatusText.setText(retweeted.getText());
 
         // Print the tweet in the Console --- FOR TEST *****
         System.out.println("@" + retweeted.getUser().getScreenName() + " - " + tweetText);
@@ -101,7 +120,21 @@ public class TweetStatus extends javax.swing.JPanel {
                 // Add substring to the statusText panel
                 jPanel1.add(new JLabel(textList.get(i).substring(4)));
             else {
-                jPanel1.add(new JLabel(new javax.swing.ImageIcon(getClass().getResource("/displaytweets/twitter_logo.png"))));
+                int iconHeight = 20, iconWidth = 20;
+                // NOTE: Change the file address based on final build structure ---
+                BufferedImage img;
+                try {
+                    img = ImageIO.read(new File("C:/Users/Kenan/Documents/School"
+                    +"/ECE Classes/Info Retrieval/TweetMoji/JavaContent/emojilist/Pics/"
+                                                +textList.get(i).replace("U+", "")+".jpg"));
+                } catch (IOException e) {
+                    img = new BufferedImage(iconWidth, iconHeight, BufferedImage.TYPE_3BYTE_BGR);
+                }
+                if (img.getHeight() < img.getWidth())
+                    iconHeight = -1;
+                else if (img.getHeight() > img.getWidth())
+                    iconWidth = -1;
+                jPanel1.add(new JLabel(new javax.swing.ImageIcon(img.getScaledInstance(iconWidth, iconHeight, Image.SCALE_SMOOTH))));
             }
         }
         
@@ -176,7 +209,7 @@ public class TweetStatus extends javax.swing.JPanel {
                 .addGroup(retweetPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(screenname_r)
                     .addComponent(username_r))
-                .addContainerGap(94, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         retweetPanelLayout.setVerticalGroup(
             retweetPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -190,7 +223,10 @@ public class TweetStatus extends javax.swing.JPanel {
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
         jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel1.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         jPanel1.setPreferredSize(new java.awt.Dimension(310, 100));
+        FlowLayout flow = new FlowLayout(FlowLayout.LEADING);
+        jPanel1.setLayout(flow);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -203,24 +239,22 @@ public class TweetStatus extends javax.swing.JPanel {
                         .addComponent(profile)
                         .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(screenname)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(screenname)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(username)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(retweet))))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addGroup(layout.createSequentialGroup()
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(retweetPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(date)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(Location)))
-                            .addGap(150, 150, 150))
-                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(twicon, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(retweet)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(twicon, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                    .addComponent(retweetPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(date)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(Location))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(56, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -237,13 +271,13 @@ public class TweetStatus extends javax.swing.JPanel {
                 .addComponent(screenname)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(retweetPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(9, 9, 9)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(date)
                     .addComponent(Location))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 

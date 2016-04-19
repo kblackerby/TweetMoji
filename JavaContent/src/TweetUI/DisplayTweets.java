@@ -53,8 +53,8 @@ public class DisplayTweets {
             Box contain = Box.createVerticalBox();
             
             // Get the JSON files frem the Tweets folder --- REPLACE WITH SEARCH RESULT *******
-            File[] files = new File("C:\\\\Users\\\\Kenan\\\\Documents\\\\School"
-                    +"\\\\ECE Classes\\\\Info Retrieval\\\\displayTweets\\\\Tweets")
+            File[] files = new File("C:/Users/Kenan/Documents/School"
+                    +"/ECE Classes/Info Retrieval/displayTweets/Tweets")
                     .listFiles((File dir, String name) -> name.endsWith(".json"));
             
             // Iterate through the files, displaying the tweets
