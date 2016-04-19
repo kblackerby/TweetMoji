@@ -39,7 +39,7 @@ public class EmojiListReader {
             Cell uniCodeRow = row.getCell(1);
             String uniCodeVal = stringCellDataType(uniCodeRow);
 
-            if (transUniCode.equalsIgnoreCase(uniCodeVal)) {
+            if (transUniCode.equalsIgnoreCase(uniCodeVal) ) {
                 Cell emoji = row.getCell(1);
                 Cell desc = row.getCell(2);
                 Cell alias = row.getCell(3);
@@ -49,6 +49,12 @@ public class EmojiListReader {
                         stringCellDataType(alias), stringCellDataType(tags), stringCellDataType(rank)};
             }
 
+
+        }
+
+        if(!rowIterator.hasNext()&&
+                emojiData.length==0) {
+            emojiData = null;
         }
         closeEmojiSheet(emojiFileNameStr);
         return emojiData;
@@ -75,20 +81,27 @@ public class EmojiListReader {
          */
         ArrayList<String[]> emojiDataList = new ArrayList<>();
 
+
         double sumRank = 0;
         for (int i = 0; i < emojiCodeList.size(); i++) {
             emojiCodeList.get(i);
             //emojiDataList is basically an array of emoji description form the excel file
             emojiData = getEmojiDataByUniCode(emojFilleNameStr, emojiCodeList.get(i));
-            emojiDataList.add(emojiData);
-            System.out.println((i+1) +") - Emoji Code: "+ emojiCodeList.get(i) +" - Description: "+ ": "
-                    + emojiData[1] +" - Score: "+emojiData[4]);
-            sumRank += new Double(emojiData[4]);
+            if (emojiData != null) {
+                emojiDataList.add(emojiData);
+                System.out.println((i + 1) + ") - Emoji Code: " + emojiCodeList.get(i) + " - Description: " + ": "
+                        + emojiData[1] + " - Score: " + emojiData[4]);
+                sumRank += new Double(emojiData[4]);
+            }
+            else {
+                System.out.println(emojiCodeList.get(i) +" is not an emoji in List (but a Unicode character) ");
+
+            }
         }
 
         //Total List of Emojis in file
         int lastRowNum = emojiSheet.getLastRowNum();
-        System.out.println("\nTotal Number of Emojis in list " + lastRowNum);
+        //System.out.println("\nTotal Number of Emojis in list " + lastRowNum);
 
         return emojiDataList;
     }
