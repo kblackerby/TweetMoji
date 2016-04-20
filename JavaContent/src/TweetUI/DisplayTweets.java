@@ -1,75 +1,60 @@
-// --- Change the package to integrate into the other pieces *******
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package displaytweets;
 
-/*
- * Copyright 2007 Yusuke Yamamoto
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- *
- * @author Kenan Blackerby
- * 
- * This is a test program that demonstrates how to display the tweets
- */
-
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.awt.GraphicsEnvironment;
-import java.io.*;
-import java.nio.charset.Charset;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.Box;
-import javax.swing.JFrame;
-import static javax.swing.JFrame.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import twitter4j.Status;
 import twitter4j.TwitterException;
 import twitter4j.TwitterObjectFactory;
 
-public class DisplayTweets {
+/**
+ *
+ * @author Kenan
+ */
+public class displayTweets extends javax.swing.JFrame {
 
-    /**
-     * @param args the command line arguments
-     */
-     public static void main(String[] args) {
+    private File[] tweetList; // list of files to be displayed
+    private int pageLen; // length of pages (number of tweets in a page)
+    private int pageNum; // currently displayed page
+    
+    // Constructor - builds form and initializes the class fields
+    public displayTweets() {
+        this.pageLen = 1;
+        this.pageNum = 0; // first page
+        // Get the JSON files frem the Tweets folder --- REPLACE WITH SEARCH RESULT *******
+        this.tweetList = new File("C:/Users/Kenan/Documents/School"
+                +"/ECE Classes/Info Retrieval/displayTweets/Tweets")
+                .listFiles((File dir, String name) -> name.endsWith(".json"));
+        // pre-generated form creation
+        initComponents();
+        // fill the form
+        UpdateDisplay();
+    }
+    
+    // display the tweets for the current page
+    private void UpdateDisplay() {
+        // clear panel of previous page (if applicable)
+        tweetPanel.removeAll();
+        
         try {
-            // Create a Frame --- FOR TEST *****
-            JFrame tweetList = new JFrame();
-            tweetList.setDefaultCloseOperation(EXIT_ON_CLOSE);
-            
-            // Container Box for the tweet panels to go in (Display Vertically)
-            Box contain = Box.createVerticalBox();
-            
-            // Get the JSON files frem the Tweets folder --- REPLACE WITH SEARCH RESULT *******
-            File[] files = new File("C:/Users/Kenan/Documents/School"
-                    +"/ECE Classes/Info Retrieval/displayTweets/Tweets")
-                    .listFiles((File dir, String name) -> name.endsWith(".json"));
-            
-            // Iterate through the files, displaying the tweets
-            for (File file : files) {
-                // Create Status Object from the file
-                String rawJSON = readFirstLine(file);
+        // Iterate through the files, displaying the tweets
+            for (int i = pageLen * pageNum; i < Integer.min((pageNum+1)*pageLen, Array.getLength(tweetList));i++) {
+                // Create Status Object from the file and add to panel
+                String rawJSON = readFirstLine(tweetList[i]);
                 Status tweet = TwitterObjectFactory.createStatus(rawJSON);              
-       
                 TweetStatus stat = new TweetStatus(tweet);
-                contain.add(stat);
+                tweetPanel.add(stat);
             }
-            tweetList.add(contain);
-            tweetList.pack();
-            tweetList.setVisible(true);
-            
+            // make changes visible
+            tweetPanel.revalidate();
           // Exceptions if errors in getting tweets
         } catch (IOException ioe) {
             System.out.println("Failed to store tweets: " + ioe.getMessage());
@@ -80,6 +65,7 @@ public class DisplayTweets {
     }
     
     // method to retrieve the tweets from the files (UTF-8 format)
+    // Copyright 2007 Yusuke Yamamoto
     private static String readFirstLine(File fileName) throws IOException {
         FileInputStream fis = null;
         InputStreamReader isr = null;
@@ -110,4 +96,151 @@ public class DisplayTweets {
             }
         }
     }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        TweetScrollPane = new javax.swing.JScrollPane();
+        tweetPanel = new javax.swing.JPanel();
+        backButton = new javax.swing.JButton();
+        nextButton = new javax.swing.JButton();
+        goButton = new javax.swing.JButton();
+        pageSelect = new javax.swing.JComboBox<>();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        tweetPanel.setLayout(new javax.swing.BoxLayout(tweetPanel, javax.swing.BoxLayout.Y_AXIS));
+        TweetScrollPane.setViewportView(tweetPanel);
+
+        backButton.setText("Back");
+        backButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                backButtonMouseClicked(evt);
+            }
+        });
+
+        nextButton.setText("Next");
+        nextButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                nextButtonMouseClicked(evt);
+            }
+        });
+
+        goButton.setText("Go");
+        goButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                goButtonActionPerformed(evt);
+            }
+        });
+
+        String[] pages = new String[(int)Math.ceil((double)Array.getLength(tweetList)/pageLen)];
+        for (int i = 0; i < Array.getLength(pages); i++) {
+            pages[i] = Integer.toString(i+1);
+        }
+        pageSelect.setModel(new javax.swing.DefaultComboBoxModel<>(pages));
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(TweetScrollPane)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(backButton)
+                        .addGap(18, 18, 18)
+                        .addComponent(pageSelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(goButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 198, Short.MAX_VALUE)
+                        .addComponent(nextButton)))
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(TweetScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 331, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(backButton)
+                    .addComponent(nextButton)
+                    .addComponent(goButton)
+                    .addComponent(pageSelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    // Listeners for the buttons
+    // back button - move to previous page
+    private void backButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_backButtonMouseClicked
+        if (pageNum > 0) {
+            pageNum--;
+            UpdateDisplay();
+        }
+    }//GEN-LAST:event_backButtonMouseClicked
+    
+    // next button - move to next page
+    private void nextButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_nextButtonMouseClicked
+        if ((pageNum+1) * pageLen < Array.getLength(tweetList)) {
+            pageNum++;
+            UpdateDisplay();
+        }
+    }//GEN-LAST:event_nextButtonMouseClicked
+
+    // go button - move to selected to page
+    private void goButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goButtonActionPerformed
+        pageNum = pageSelect.getSelectedIndex();
+        UpdateDisplay();
+    }//GEN-LAST:event_goButtonActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException | InstantiationException |
+                 IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(displayTweets.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+        
+        //</editor-fold>
+        
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(() -> {
+            displayTweets dT = new displayTweets();
+            dT.setVisible(true);
+        });
+        
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JScrollPane TweetScrollPane;
+    private javax.swing.JButton backButton;
+    private javax.swing.JButton goButton;
+    private javax.swing.JButton nextButton;
+    private javax.swing.JComboBox<String> pageSelect;
+    private javax.swing.JPanel tweetPanel;
+    // End of variables declaration//GEN-END:variables
 }
