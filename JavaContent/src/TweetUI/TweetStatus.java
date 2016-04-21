@@ -41,8 +41,8 @@ public class TweetStatus extends javax.swing.JPanel {
         String tweetText = tweet.getText();
         Date createdAt = tweet.getCreatedAt();
         
-        // Print the tweet in the Console --- FOR TEST *****
-        System.out.println("@" + sname + " - " + tweetText);
+//        // Print the tweet in the Console --- FOR TEST *****
+//        System.out.println("@" + sname + " - " + tweetText);
                 
         username.setText(uname);
         screenname.setText("@" + sname);
@@ -106,8 +106,8 @@ public class TweetStatus extends javax.swing.JPanel {
         username_r.setText(retweeted.getUser().getName());
         screenname_r.setText(retweeted.getUser().getScreenName());
 
-        // Print the tweet in the Console --- FOR TEST *****
-        System.out.println("@" + retweeted.getUser().getScreenName() + " - " + tweetText);
+//        // Print the tweet in the Console --- FOR TEST *****
+//        System.out.println("@" + retweeted.getUser().getScreenName() + " - " + tweetText);
         
         ArrayList<String> textList = guiUnicodeEmoji.identifyEmojiCode(tweetText);
         javax.swing.JLabel text = new JLabel();
@@ -239,9 +239,7 @@ public class TweetStatus extends javax.swing.JPanel {
                         .addComponent(profile)
                         .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(screenname)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(screenname)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(username)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -271,13 +269,13 @@ public class TweetStatus extends javax.swing.JPanel {
                 .addComponent(screenname)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(retweetPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(date)
                     .addComponent(Location))
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 

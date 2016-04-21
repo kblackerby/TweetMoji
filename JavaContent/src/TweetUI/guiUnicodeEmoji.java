@@ -17,7 +17,7 @@ public class guiUnicodeEmoji {
      * @return ArrayList <String>
      */
     public static ArrayList<String> identifyEmojiCode(String inputCode) {
-        System.out.println("Original Input Code: "+inputCode);
+//        System.out.println("Original Input Code: "+inputCode);
 
         /**
          * Regular Expression checking for emojis, considering the different ranges of unicode representation of these emojis
@@ -105,12 +105,12 @@ public class guiUnicodeEmoji {
         for (String uniCode : uniCodeList) {
             System.out.println(i++ + ": " + uniCode);
         }*/
-        System.out.println("There exist "+matchList.size()+" Emojis and Text Snippets in this Tweet");
+//        System.out.println("There exist "+matchList.size()+" Emojis and Text Snippets in this Tweet");
         
         
-        for (int i = 0; i < matchList.size(); i++) {
-			System.out.println(matchList.get(i));
-		}
+//        for (int i = 0; i < matchList.size(); i++) {
+//			System.out.println(matchList.get(i));
+//		}
 
         return matchList;
     }

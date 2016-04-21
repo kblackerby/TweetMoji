@@ -19,14 +19,16 @@ import twitter4j.TwitterObjectFactory;
  *
  * @author Kenan
  */
-public class displayTweets extends javax.swing.JFrame {
+public class DisplayTweets extends javax.swing.JPanel {
 
     private File[] tweetList; // list of files to be displayed
     private int pageLen; // length of pages (number of tweets in a page)
     private int pageNum; // currently displayed page
     
-    // Constructor - builds form and initializes the class fields
-    public displayTweets() {
+    /**
+     * Creates new form NewJPanel
+     */
+    public DisplayTweets() {
         this.pageLen = 1;
         this.pageNum = 0; // first page
         // Get the JSON files frem the Tweets folder --- REPLACE WITH SEARCH RESULT *******
@@ -38,7 +40,7 @@ public class displayTweets extends javax.swing.JFrame {
         // fill the form
         UpdateDisplay();
     }
-    
+
     // display the tweets for the current page
     private void UpdateDisplay() {
         // clear panel of previous page (if applicable)
@@ -96,7 +98,7 @@ public class displayTweets extends javax.swing.JFrame {
             }
         }
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -106,29 +108,16 @@ public class displayTweets extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        TweetScrollPane = new javax.swing.JScrollPane();
-        tweetPanel = new javax.swing.JPanel();
         backButton = new javax.swing.JButton();
-        nextButton = new javax.swing.JButton();
         goButton = new javax.swing.JButton();
         pageSelect = new javax.swing.JComboBox<>();
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        tweetPanel.setLayout(new javax.swing.BoxLayout(tweetPanel, javax.swing.BoxLayout.Y_AXIS));
-        TweetScrollPane.setViewportView(tweetPanel);
+        nextButton = new javax.swing.JButton();
+        tweetPanel = new javax.swing.JPanel();
 
         backButton.setText("Back");
         backButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 backButtonMouseClicked(evt);
-            }
-        });
-
-        nextButton.setText("Next");
-        nextButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                nextButtonMouseClicked(evt);
             }
         });
 
@@ -145,51 +134,61 @@ public class displayTweets extends javax.swing.JFrame {
         }
         pageSelect.setModel(new javax.swing.DefaultComboBoxModel<>(pages));
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
+        nextButton.setText("Next");
+        nextButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                nextButtonMouseClicked(evt);
+            }
+        });
+
+        tweetPanel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        tweetPanel.setLayout(new javax.swing.BoxLayout(tweetPanel, javax.swing.BoxLayout.Y_AXIS));
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(TweetScrollPane)
+                    .addComponent(tweetPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(backButton)
                         .addGap(18, 18, 18)
                         .addComponent(pageSelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(goButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 198, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 235, Short.MAX_VALUE)
                         .addComponent(nextButton)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(TweetScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 331, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
+                .addComponent(tweetPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 328, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(backButton)
-                    .addComponent(nextButton)
                     .addComponent(goButton)
-                    .addComponent(pageSelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(pageSelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(nextButton))
                 .addContainerGap())
         );
-
-        pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    // Listeners for the buttons
-    // back button - move to previous page
     private void backButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_backButtonMouseClicked
         if (pageNum > 0) {
             pageNum--;
             UpdateDisplay();
         }
     }//GEN-LAST:event_backButtonMouseClicked
-    
-    // next button - move to next page
+
+    private void goButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goButtonActionPerformed
+        pageNum = pageSelect.getSelectedIndex();
+        UpdateDisplay();
+    }//GEN-LAST:event_goButtonActionPerformed
+
     private void nextButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_nextButtonMouseClicked
         if ((pageNum+1) * pageLen < Array.getLength(tweetList)) {
             pageNum++;
@@ -197,46 +196,8 @@ public class displayTweets extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_nextButtonMouseClicked
 
-    // go button - move to selected to page
-    private void goButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goButtonActionPerformed
-        pageNum = pageSelect.getSelectedIndex();
-        UpdateDisplay();
-    }//GEN-LAST:event_goButtonActionPerformed
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException | InstantiationException |
-                 IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(displayTweets.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        
-        //</editor-fold>
-        
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> {
-            displayTweets dT = new displayTweets();
-            dT.setVisible(true);
-        });
-        
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane TweetScrollPane;
     private javax.swing.JButton backButton;
     private javax.swing.JButton goButton;
     private javax.swing.JButton nextButton;
