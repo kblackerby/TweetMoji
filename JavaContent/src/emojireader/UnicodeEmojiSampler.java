@@ -33,9 +33,9 @@ public class UnicodeEmojiSampler {
          * 9. Other symbols
          */
         String regionalIndicator = "[\uD83C\uDDE6-\uD83C\uDDFF]"; //Regional Indicator
-        String fitzpatrickSupport = "[\uD83C\uDFFB-\uD83C\uDFFF]";  //Fitzparick Type 1&2-6-6*/
+        String fitzpatrickSupport = "[\uD83C\uDFFB-\uD83C\uDFFF]";  //Fitzparick Type 1&2-6*/
         String charCombo = "\u20E3"; //Combining Diacritical
-        String variationSelector = "[\uFE00-\uFE0F]"; //Variation Selector
+        String variationSelector = "\uFE0F"; //Variation Selector
         String heirarchy = "\u200D"; //Heirarchical
 
         String regexPattern = "[\uD83D\uDE01-\uD83D\uDE4F]|" + //Emoticons
@@ -49,8 +49,9 @@ public class UnicodeEmojiSampler {
                 "[\u25AA-\u25FE]|" + //Geometric Shapes
                 "[\u2B01-\u2BD1]|" + //Miscellaneous Symbols and Arrows
                 "[\u2122-\u2139]|" + //Arrows ++
+                "\u203c|\u2049" +
                 "[\u2194-\u29AB]|" + //Arrows
-                "[\u0023-\u0039]"+charCombo+"|" + //Basic Latin
+                "[\u0023-\u0039]"+charCombo+"|[\u0023-\u0039]"+variationSelector+charCombo+"|" + //Basic Latin + char combo
                 "[\uD83C\uDD70-\uD83C\uDD9A]|\u24C2|" + //Enclosed Alphanumeric Supplement
                 "[\uD83C\uDE00-\uD83C\uDE51]|\u3297|\u3299|" + //Enclosed Ideographic Supplement
                 "[\uD83D\uDE00-\uD83D\uDE81]|" + //Additional emoticon
@@ -156,6 +157,7 @@ public class UnicodeEmojiSampler {
                         + " U+" + Long.toHexString(matchListFormat.get(i+1).codePointAt(0)));
                 matchListFormat.remove(i+1);
             }
+            //if(matchListFormat.get(i).endsWith(variationSelector+charCombo))
 
             //Remove unnecessary variationSelector
             if (matchListFormat.get(i).matches(variationSelector) &&
@@ -215,13 +217,15 @@ public class UnicodeEmojiSampler {
 
 
 
-        String inputCode = "home is where you put your guns up \ud83d\udd2b\u2b06\ufe0f\u2764\ufe0f #WreckEm #TTU20 " +
-                "https:\\/\\/t.co\\/Lq96li43TD";
+        String inputCode = "home is where you put your guns up..\ud83d\udd2b\u2b06\ufe0f\u2764\ufe0f  http://stackoverflow.com/questions/18830813/how-can-i-remove-punctuation-from-input-text-in-java #WreckEm #TTU20 " ;
+                //"https:\/\/t.co\/Lq96li43TD https:\/\t.co\/R3yQVGM1QB ";
 
         identifyEmojiCode(inputCode);
-
+        String line = "Here. is! some, punctuation?";
+        line = line.replaceAll("\\p{Punct}", " ");
+        System.out.println(line);
         SentimentRankAssignement.init();
         SentimentRankAssignement.findSentimentRank(inputCode);
-
     }
+
 }

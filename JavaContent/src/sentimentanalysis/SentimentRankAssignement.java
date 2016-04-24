@@ -39,6 +39,8 @@ public class SentimentRankAssignement {
                         .get(SentimentCoreAnnotations.SentimentAnnotatedTree.class);
                 int sentiment = RNNCoreAnnotations.getPredictedClass(tree);
                 String partText = sentence.toString();
+                //remove extra punctuation
+                partText = partText.replaceAll("\\p{Punct}", "");
                 if (partText.length() > longest) {
                     numIteration++;
                     subTotalSentiment += sentiment;

@@ -1,14 +1,9 @@
 package tweetaccess;
 
-import edu.stanford.nlp.util.CollectionUtils;
-
 import java.io.File;
 import java.io.FilenameFilter;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Created by Bukunmi on 2/14/2016.
@@ -25,7 +20,7 @@ public class FileValidation {
      * @param directoryPath
      * @return
      */
-    public ArrayList<File> listFilesInDirectory(String directoryPath){
+    public ArrayList<File> listTweetsInDirectory(String directoryPath){
         //List the files present in a particular directory
 
         File parentDir;
@@ -67,15 +62,32 @@ public class FileValidation {
         return paths;
     }
 
+    public ArrayList<File> listFileInDirectory(String directoryPath){
+        File parentDir = new File(directoryPath);
+        ArrayList<File> fileName = new ArrayList<>(0);
+        Collections.addAll(fileName, parentDir.
+                listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                if (new File(name).isDirectory()){
+                    return false;
+                }
+                //return only .JPG files
+                return name.endsWith("JPG");
+            }
+        }));
+        return fileName;
+    }
+
     public static void main(String[] args) {
 
         //main method was used to test FileValidation class
         String baseDir = System.getProperty("user.dir");
-        String tweetDir = baseDir + "\\resources\\IndividualTweetsDaniel";
+        String tweetDir = baseDir + "\\resources\\RankedTweet";
 
 
         FileValidation fileValidation = new FileValidation();
-        fileValidation.listFilesInDirectory(tweetDir);
+        fileValidation.listTweetsInDirectory(tweetDir);
 
 
     }
