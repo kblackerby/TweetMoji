@@ -64,9 +64,9 @@ public class TweetStatus extends javax.swing.JPanel {
                 // NOTE: Change the file address based on final build structure ---
                 BufferedImage img;
                 try {
-                    img = ImageIO.read(new File("C:/Users/Kenan/Documents/School"
-                    +"/ECE Classes/Info Retrieval/TweetMoji/JavaContent/emojilist/Pics/"
-                                                +textList.get(i).replace("U+", "")+".jpg"));
+                    File f = new File(System.getProperty("user.dir"));
+                    String picDir = f.getParentFile().getParent() + "/emojilist/Pics/";
+                    img = ImageIO.read(new File(picDir + textList.get(i).replace("U+", "")+".jpg"));
                 } catch (IOException e) {
                     img = new BufferedImage(iconWidth, iconHeight, BufferedImage.TYPE_3BYTE_BGR);
                 }
@@ -124,9 +124,9 @@ public class TweetStatus extends javax.swing.JPanel {
                 // NOTE: Change the file address based on final build structure ---
                 BufferedImage img;
                 try {
-                    img = ImageIO.read(new File("C:/Users/Kenan/Documents/School"
-                    +"/ECE Classes/Info Retrieval/TweetMoji/JavaContent/emojilist/Pics/"
-                                                +textList.get(i).replace("U+", "")+".jpg"));
+                    File f = new File(System.getProperty("user.dir"));
+                    String picDir = f.getParentFile().getParent() + "/emojilist/Pics/";
+                    img = ImageIO.read(new File(picDir + textList.get(i).replace("U+", "")+".jpg"));
                 } catch (IOException e) {
                     img = new BufferedImage(iconWidth, iconHeight, BufferedImage.TYPE_3BYTE_BGR);
                 }
