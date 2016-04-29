@@ -9,8 +9,6 @@ import org.json.simple.parser.ParseException;
 import sentimentanalysis.SentimentRankAssignement;
 
 import java.io.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -51,51 +49,39 @@ public class TweetSentimentAssignment {
      * @return
      * @throws IOException
      */
-    private static ArrayList<Double> getSentimentScore(String fileDirc) throws IOException {
+    private static ArrayList<Double> getSentimentScore(String fileDirc, String tweetText) throws IOException {
         FileReader reader;
-        JSONParser parser  = new JSONParser();
+        JSONParser parser = new JSONParser();
 
         ArrayList<Double> sentRank = new ArrayList<>();
         double sumRank = 0;
 
         //init Sentiment Rank
         SentimentRankAssignement.init();
-        try {
-            reader = new FileReader(fileDirc);
-            Object parse = parser.parse(reader);
-            JSONObject jsonObject = (JSONObject) parse;
 
-            String text = (String) jsonObject.get("text");
+        //remove urls before finding the sentiment on the tweet
+        //sentRank.add(SentimentRankAssignement.findSentimentRank(removeUrl(tweetText)) );
+        // but due to shorthand url codes, the remove url doesn't work for all url.
+        sentRank.add(SentimentRankAssignement.findSentimentRank(tweetText));
 
-            //remove urls before finding the sentiment on the tweet
-            //sentRank.add(SentimentRankAssignement.findSentimentRank(removeUrl(text)) );
-            sentRank.add(SentimentRankAssignement.findSentimentRank(text));
-
-            ArrayList<String[]> emojiDataList = getEmojis(text);
-            for (String[] emojiData :
-                    emojiDataList) {
-                System.out.println("Emoji for: "+emojiData[2]);
-                sumRank += new Double(emojiData[4]);
-            }
-            reader.close();
-            //average Sentiment rank
-            if (emojiDataList.size() != 0){
-                double aveRank = sumRank/emojiDataList.size();
-                System.out.println("Average Emoji Sentiment Rank " + aveRank);
-                sentRank.add(aveRank);
-            }
-            else {
-                //sentRank;
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
+        //getemoji() is used here to get the sentiment score off each tweet
+        ArrayList<String[]> emojiDataList = getEmojis(tweetText);
+        for (String[] emojiData :
+                emojiDataList) {
+            sumRank += new Double(emojiData[4]);
         }
-
-
+        //average Sentiment rank
+        if (emojiDataList.size() != 0) {
+            double aveEmojiRank = sumRank / emojiDataList.size();
+            System.out.println("Average Emoji Sentiment Rank " + aveEmojiRank);
+            sentRank.add(aveEmojiRank);
+        } else {
+            //sentRank;
+        }
         return sentRank;
     }
 
-    private static ArrayList<String[]> getEmojis(String text) {
+    private static ArrayList<String[]> getEmojis(String text) throws IOException {
         ArrayList<String> emojiList = UnicodeEmojiSampler.identifyEmojiCode(text);
         return EmojiDataAccess.showAllEmojiFromList(emojiList);
     }
@@ -108,59 +94,80 @@ public class TweetSentimentAssignment {
         Object parse = parser.parse(reader);
         JSONObject jsonObject = (JSONObject) parse;
 
-        if (!jsonObject.containsKey("total_sentiment_rank")){
+        if (!jsonObject.containsKey("total_sentiment_rank")) {
 
             String text = (String) jsonObject.get("text");
             double sumSent = 0;
-            ArrayList<Double> indvSentRank = getSentimentScore(fileDirc);
-            for (double sentimentRank: indvSentRank){
+            double sentimentRank;
+            double avrSentRank;
+            ArrayList<Double> indvSentRank = getSentimentScore(fileDirc, text);
+
+            ///add up tweets sentiment for text and emojis
+
+            for (int i = 0; i < indvSentRank.size(); i++) {
+                if (indvSentRank.get(i).isNaN()) {
+                    sentimentRank = 0;
+                } else {
+                    sentimentRank = indvSentRank.get(i);
+                }
                 sumSent += sentimentRank;
             }
-            double avrSentRank = sumSent/indvSentRank.size();
-            double textSentRank = indvSentRank.get(0);
+            avrSentRank = sumSent / indvSentRank.size();
+            if (indvSentRank.get(0).isNaN() && indvSentRank.size() == 2) {
+                avrSentRank = indvSentRank.get(1);
 
-            FileWriter writer =new FileWriter(fileDirc);
+            }
+            FileWriter writer = new FileWriter(fileDirc);
             JSONObject obj = new JSONObject();
 
             //write these to json file
-            jsonObject.put("text_sentiment_rank_str", String.valueOf(textSentRank) );
-            jsonObject.put("text_sentiment_rank", textSentRank);
+            if (!indvSentRank.get(0).isNaN() && indvSentRank.size() == 2) {
+                double textSentRank = indvSentRank.get(0);
+                jsonObject.put("text_sentiment_rank_str", String.valueOf(textSentRank));
+                jsonObject.put("text_sentiment_rank", textSentRank);
+            }
 
             if (indvSentRank.size() == 2) {
-                double emojiSentRank= indvSentRank.get(1);
+                double emojiSentRank = indvSentRank.get(1);
                 jsonObject.put("emoji_sentiment_rank_str", String.valueOf(emojiSentRank));
                 jsonObject.put("emoji_sentiment_rank", emojiSentRank);
 
                 JSONArray emojiList = new JSONArray();
-                for (String[] emojiData:
-                        getEmojis(text)){
+                ArrayList<String[]> eL = getEmojis(text);
+                for (int i = 0; i < eL.size(); i++) {
+                    if (i != 0 && eL.get(i)[0].equals(eL.get(i - 1)[0])) {
+                        i--;
+                        eL.remove(i + 1);
+                    }
+                }
+                for (String[] emojiData :
+                        eL) {
                     JSONObject emojiItem = new JSONObject();
                     String[] tagList = emojiData[3].replace(", ", ",").split(",");
                     emojiItem.put("code", emojiData[0].replace("U+", "").replace(" ", ""));
                     emojiItem.put("alias", emojiData[2]);
                     JSONArray tags = new JSONArray();
-                    for (String tag: tagList) {
+                    for (String tag : tagList) {
                         tags.add(tag.replace(" ", ""));
                     }
                     emojiItem.put("tags", tags);
 
                     emojiList.add(emojiItem);
                 }
-                jsonObject.put("emojiList",  emojiList);
-            }
-            else {
+                jsonObject.put("emojiList", emojiList);
+            } else {
                 jsonObject.put("emoji_sentiment_rank_str", null);
                 jsonObject.put("emoji_sentiment_rank", null);
-                jsonObject.put("emojiList",  null);
+                jsonObject.put("emojiList", null);
 
             }
 
-            jsonObject.put("total_sentiment_rank_str", String.valueOf(avrSentRank) );
-            jsonObject.put("total_sentiment_rank",  avrSentRank);
+            jsonObject.put("total_sentiment_rank_str", String.valueOf(avrSentRank));
+            jsonObject.put("total_sentiment_rank", avrSentRank);
 
             System.out.println("\n Total Average Sentiment Rank " + avrSentRank);
 
-            jsonObject.writeJSONString(jsonObject,writer);
+            jsonObject.writeJSONString(jsonObject, writer);
             writer.close();
         }
     }
@@ -172,13 +179,27 @@ public class TweetSentimentAssignment {
 
         String baseDir = System.getProperty("user.dir");
         String tweetDir = baseDir + "\\resources\\RankedTweet";
+        String[] fileList = fileList(tweetDir);
+
+        //Test sentiment Assignment
+        /*String tweetDir2 = baseDir + "\\resources\\sampleTweet.json";
+        try {
+            insertTweetSentimentAndEmoji(tweetDir2);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }*/
+
         for (String val :
-                fileList(tweetDir)) {
+                fileList) {
             try {
                 insertTweetSentimentAndEmoji(val);
             } catch (IOException e) {
+                System.out.println("IO Exception Error = " + e);
                 e.printStackTrace();
             } catch (ParseException e) {
+                System.out.println("Parser Exception Error= " + e);
                 e.printStackTrace();
             }
             System.out.println(val);

@@ -9,6 +9,8 @@ import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.util.CoreMap;
 
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Bukunmi on 4/2/2016.
@@ -40,7 +42,7 @@ public class SentimentRankAssignement {
                 int sentiment = RNNCoreAnnotations.getPredictedClass(tree);
                 String partText = sentence.toString();
                 //remove extra punctuation
-                partText = partText.replaceAll("\\p{Punct}", "");
+                partText =removeUrl(partText);
                 if (partText.length() > longest) {
                     numIteration++;
                     subTotalSentiment += sentiment;
@@ -53,5 +55,17 @@ public class SentimentRankAssignement {
         }
         System.out.println("Sentiment Value: " +mainSentiment);
         return mainSentiment;
+    }
+
+    //Due to irregularities with the removeURL in the TeetsentimentAssignmet, the remove url is now working here, it remover all string that atarts with Http or other internet protocols
+    private static String removeUrl(String inputCode) {
+        inputCode = inputCode.replaceAll("\\p{Punct}", "");
+        String urlPattern = "((https?|ftp|gopher|telnet|file|Unsure|http)[\\w]+)";
+        Pattern p = Pattern.compile(urlPattern, Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(inputCode);
+        while (m.find()) {
+            inputCode = inputCode.replaceAll(m.group(0), "").trim();
+        }
+        return inputCode;
     }
 }

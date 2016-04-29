@@ -4,6 +4,8 @@ import tweetaccess.FileValidation;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Created by Bukunmi on 3/31/2016.
@@ -14,43 +16,42 @@ public class EmojiDataAccess {
      * @param emojiList
      * @return
      */
-    public static ArrayList<String[]> showAllEmojiFromList(ArrayList<String> emojiList) {
+    public static ArrayList<String[]> showAllEmojiFromList(ArrayList<String> emojiList) throws IOException {
         //emoji directory
         String baseDir = System.getProperty("user.dir");
         String emojiListFile = baseDir + "\\resources\\emojilist\\EmojiList.xls";
 
         String emojiPicDir = baseDir + "\\resources\\emojilist\\Pics";
 
-        ArrayList<String[]> emojiDataList= new ArrayList<>();
+        ArrayList<String[]> emojiDataList = new ArrayList<>();
         EmojiListReader emojiListReader = new EmojiListReader();
-        try {
-            //emojiListReader.assingSentimentRank(emojiListFile);
-            emojiDataList = emojiListReader.getEmojiDataListByUniCode(emojiListFile, emojiList);
-            if (!emojiDataList.isEmpty()){
-            collectUnavailableEmojiCode(emojiDataList, emojiPicDir);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        //emojiListReader.assingSentimentRank(emojiListFile);
+        emojiDataList = emojiListReader.getEmojiDataListByUniCode(emojiListFile, emojiList);
+        ArrayList<String[]> duplicateList = new ArrayList<>();
+        duplicateList.addAll(emojiDataList);
+        if (!duplicateList.isEmpty()) {
+            collectUnavailableEmojiCode(duplicateList, emojiPicDir);
         }
+
         return  emojiDataList;
     }
 
     /**
      * the method collect list of emojis not included in the picture library
-     * @param emojiDataArrayList
+     * @param duplicateDataArrayList
      * @param emojiPicFiles
      */
-    private static void  collectUnavailableEmojiCode(ArrayList<String[]> emojiDataArrayList, String emojiPicFiles){
+    private static void  collectUnavailableEmojiCode(ArrayList<String[]> duplicateDataArrayList, String emojiPicFiles){
         String emojiPicList = emojiPicFiles +"\\listOf\\collectedEmojis.txt";
 
         FileValidation fileValidation = new FileValidation();
         ArrayList<File> emojiPics = fileValidation.listFileInDirectory(emojiPicFiles);
 
-        for (int i = emojiDataArrayList.size() - 1; i >= 0; i--) {
-            if (emojiDataArrayList.size() == i){
+        for (int i = duplicateDataArrayList.size() - 1; i >= 0; i--) {
+            if (duplicateDataArrayList.size() == i){
                 i--;
             }
-            String emojiCode = emojiDataArrayList.get(i)[0]
+            String emojiCode = duplicateDataArrayList.get(i)[0]
                     .replace("U+", "").replace(" ", "");
 
             for (File emojiPic : emojiPics) {
@@ -59,13 +60,13 @@ public class EmojiDataAccess {
 
                 //if the emoji picture filename is equals the emojicode in list remove from list
                 if (emojiCode.equalsIgnoreCase(picName)) {
-                    if (emojiDataArrayList.size()-1 == i &&
-                            emojiDataArrayList.size() == 1 &&
+                    if (duplicateDataArrayList.size()-1 == i &&
+                            duplicateDataArrayList.size() == 1 &&
                             picName.equalsIgnoreCase(emojiCode)) {
-                        emojiDataArrayList = null;
+                        duplicateDataArrayList = null;
                     }
                     else{
-                        emojiDataArrayList.remove(i);
+                        duplicateDataArrayList.remove(i);
                         //i++;
 
                     }
@@ -73,8 +74,8 @@ public class EmojiDataAccess {
             }
         }
         //Collected Emojis not in Pic List there is any
-        if (emojiDataArrayList != null) {
-            ArrayList<String[]> newCollectedList = emojiDataArrayList;
+        if (duplicateDataArrayList != null) {
+            ArrayList<String[]> newCollectedList = duplicateDataArrayList;
             for (String newCollection[] : newCollectedList) {
                 System.out.println("Collected " + newCollection[0] + " For observation");
                 if (readEmojiTxt(newCollection[0], emojiPicList) == null) {

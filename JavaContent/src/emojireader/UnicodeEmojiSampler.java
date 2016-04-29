@@ -17,7 +17,7 @@ public class UnicodeEmojiSampler {
      * @param inputCode
      * @return ArrayList<String> matchedList
      */
-    public static ArrayList<String> identifyEmojiCode(String inputCode) {
+    public static ArrayList<String> identifyEmojiCode(String inputCode) throws IOException {
         System.out.println("Original Input String to retrieve emojis: "+inputCode +"\n");
 
         /**
@@ -55,6 +55,7 @@ public class UnicodeEmojiSampler {
                 "[\uD83C\uDD70-\uD83C\uDD9A]|\u24C2|" + //Enclosed Alphanumeric Supplement
                 "[\uD83C\uDE00-\uD83C\uDE51]|\u3297|\u3299|" + //Enclosed Ideographic Supplement
                 "[\uD83D\uDE00-\uD83D\uDE81]|" + //Additional emoticon
+                "[\uD83E\uDD10-\uD83E\uDDE2]|" + //most recent and expected range
                 regionalIndicator +"|"+ fitzpatrickSupport+"|"+ heirarchy +"|"+ variationSelector ;
 
         String string1 = null;
@@ -87,7 +88,7 @@ public class UnicodeEmojiSampler {
      * @param emojiList
      * @return ArrayList<String> emojiList
      */
-    public static ArrayList<String> getCorrectEmojiList(String regionalIndicator, String charCombo, String variationSelector, String heirarchy, ArrayList<String> emojiList) {
+    public static ArrayList<String> getCorrectEmojiList(String regionalIndicator, String charCombo, String variationSelector, String heirarchy, ArrayList<String> emojiList) throws IOException {
         /**
          * sortUnicode sorts and combine hierarchical emoji unicode
          */
@@ -99,7 +100,7 @@ public class UnicodeEmojiSampler {
             }
         }
         //EmojiDataAccess.showAllEmojiFromList(emojiList);
-        System.out.println("There exist " + emojiList.size() + " Emoji(2) Similar Unicodes in this Tweet");
+        System.out.println("There exist " + emojiList.size() + " Emoji(s) Similar Unicodes in this Tweet");
 
         return emojiList;
     }
@@ -107,13 +108,13 @@ public class UnicodeEmojiSampler {
     /**
      * The method identifies multiple-emoji-unicode representations and resize array gooten from the inputed String
      * @param regionalIndicator
-     * @param heirarchy
+     * @param hierarchy
      * @param charCombo
      * @param variationSelector
      * @param matchListFormat
      * @return
      */
-    public static ArrayList<String> sortUnicodeList(String regionalIndicator, String heirarchy, String charCombo,
+    public static ArrayList<String> sortUnicodeList(String regionalIndicator, String hierarchy, String charCombo,
                                                     String variationSelector, ArrayList<String> matchListFormat) {
         for(int i=0;i<matchListFormat.size();i++) {
 
@@ -123,8 +124,16 @@ public class UnicodeEmojiSampler {
                         + " U+" + Long.toHexString(charCombo.codePointAt(0)));
             }
 
+            //if the only value only in the array list is hierarchy
+            if(matchListFormat.size()-1 == 0 && matchListFormat.get(i) == hierarchy){
+                matchListFormat.remove(0);
+                return null;
+            }
+
             //matchlist is of Heirarchy
-            if (matchListFormat.get(i).matches(heirarchy) && !(matchListFormat.get(i+1).isEmpty())) {
+            if (matchListFormat.get(i).matches(hierarchy)
+                    && matchListFormat.size() != 1
+                    && !(matchListFormat.get(i+1).isEmpty())) {
 
                 //if the previous item does not start with U+ add U+
                 if (!(matchListFormat.get(i-1).startsWith("U+"))){
@@ -139,10 +148,11 @@ public class UnicodeEmojiSampler {
                 }
                 matchListFormat.remove(i+1);
                 matchListFormat.remove(i);
+
                 i--;
 
                 //variation Selector combines couples
-                if (matchListFormat.get(i).toUpperCase().startsWith("U+FE0F ") && matchListFormat.get(i+1).equals(heirarchy)
+                if (matchListFormat.get(i).toUpperCase().startsWith("U+FE0F ") && matchListFormat.get(i+1).equals(hierarchy)
                         && !(matchListFormat.get(i+1).isEmpty())) {
                     matchListFormat.set(i-1, matchListFormat.get(i-1) + " "+matchListFormat.get(i));
                     matchListFormat.remove(i);
@@ -163,10 +173,10 @@ public class UnicodeEmojiSampler {
             if (matchListFormat.get(i).matches(variationSelector) &&
                     (i == (matchListFormat.size()-1))){
                 i--;
-                matchListFormat.remove(i);
+                matchListFormat.remove(i+1);
             }
             else{
-                if(matchListFormat.get(i).matches(variationSelector) && !(matchListFormat.get(i+1).matches(heirarchy))){
+                if(matchListFormat.get(i).matches(variationSelector) && !(matchListFormat.get(i+1).matches(hierarchy))){
                     i--;
                     matchListFormat.remove(i+1);
                 }
@@ -217,12 +227,15 @@ public class UnicodeEmojiSampler {
 
 
 
-        String inputCode = "home is where you put your guns up..\ud83d\udd2b\u2b06\ufe0f\u2764\ufe0f  http://stackoverflow.com/questions/18830813/how-can-i-remove-punctuation-from-input-text-in-java #WreckEm #TTU20 " ;
-                //"https:\/\/t.co\/Lq96li43TD https:\/\t.co\/R3yQVGM1QB ";
+        String inputCode = "home is where you put your guns up..\uD83E\uDD14\ud83d\udd2b\u2b06\ufe0f\u2764\ufe0f https://t.co/Lq96li43TD";
 
-        identifyEmojiCode(inputCode);
+        try {
+            identifyEmojiCode(inputCode);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         String line = "Here. is! some, punctuation?";
-        line = line.replaceAll("\\p{Punct}", " ");
+        //line = line.replaceAll("\\p{Punct}", " ");
         System.out.println(line);
         SentimentRankAssignement.init();
         SentimentRankAssignement.findSentimentRank(inputCode);
