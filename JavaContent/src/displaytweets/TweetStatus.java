@@ -24,7 +24,7 @@ public class TweetStatus extends javax.swing.JPanel {
      * Creates new form tweetstatus
      * @param tweet
      */
-    public TweetStatus(Status tweet) {
+    public TweetStatus(Status tweet) throws IOException {
         initComponents();
         // Check for retweet and fill tweet accordingly
         if(tweet.isRetweet())
@@ -34,7 +34,7 @@ public class TweetStatus extends javax.swing.JPanel {
     }
 
     // Fills in the Tweet form with the tweet information 
-    private void fillInTweet(Status tweet) {
+    private void fillInTweet(Status tweet) throws IOException {
         // Get the username, screen name, and text for the tweet
         String uname = tweet.getUser().getName();
         String sname = tweet.getUser().getScreenName();
@@ -91,7 +91,7 @@ public class TweetStatus extends javax.swing.JPanel {
     }
     
     // Fills in the Tweet form with the tweet information 
-    private void fillInRetweet(Status tweet) {     
+    private void fillInRetweet(Status tweet) throws IOException {     
         // Get the username, screen name, and text for the tweet
         String uname = tweet.getUser().getName();
         String sname = tweet.getUser().getScreenName();
@@ -104,7 +104,7 @@ public class TweetStatus extends javax.swing.JPanel {
         Status retweeted = tweet.getRetweetedStatus();
         String tweetText = retweeted.getText();
         username_r.setText(retweeted.getUser().getName());
-        screenname_r.setText(retweeted.getUser().getScreenName());
+        screenname_r.setText("@" + retweeted.getUser().getScreenName());
 
 //        // Print the tweet in the Console --- FOR TEST *****
 //        System.out.println("@" + retweeted.getUser().getScreenName() + " - " + tweetText);

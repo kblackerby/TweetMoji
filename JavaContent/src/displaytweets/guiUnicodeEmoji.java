@@ -81,7 +81,10 @@ public class guiUnicodeEmoji {
                 addBuffer = matcher.end();
             }
         }
-
+        if (matchList.isEmpty()) {
+            matchList.add("TEXT" + stringIn);
+        }
+            
         return getCorrectEmojiList(regionalIndicator, charCombo, variationSelector, heirarchy, fitzpatrickSupport, matchList);
         
         

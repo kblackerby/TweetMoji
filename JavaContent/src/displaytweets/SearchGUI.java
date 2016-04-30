@@ -8,16 +8,30 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
+import java.security.Security;
+import java.util.ArrayList;
+
+import org.apache.lucene.document.Document;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.ScoreDoc;
+
+import query.SimpleQueryHolder;
+import searchers.EmbeddedSearcher;
+
 import twitter4j.Status;
+import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterObjectFactory;
 
 /**
  *
  * @author Kenan
+ * 	   Roshan - Implementation of Query creation and execution
  */
 public class SearchGUI extends javax.swing.JFrame {
 
+    // an SimpleQueryHolder class object that will store and format the query that will be used for searching	
+	SimpleQueryHolder simpleQueryObject = new SimpleQueryHolder();
     /**
      * Creates new form SearchGUI
      */
@@ -28,7 +42,13 @@ public class SearchGUI extends javax.swing.JFrame {
         pageLen = 10;
         pageNum = 0; // first page
     }
+    public SearchGUI(int pL) {
+            initComponents();
 
+            // Results Variables
+            pageLen = pL;
+            pageNum = 0; // first page
+        }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -39,7 +59,7 @@ public class SearchGUI extends javax.swing.JFrame {
     private void initComponents() {
 
         searchPanel = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        searchScrollPane = new javax.swing.JScrollPane();
         jPanel2 = new javax.swing.JPanel();
         incKeywords = new javax.swing.JTextField();
         searchButton = new javax.swing.JButton();
@@ -64,14 +84,22 @@ public class SearchGUI extends javax.swing.JFrame {
         hashtags = new javax.swing.JTextField();
         noResultsLabel = new javax.swing.JLabel();
         errorLabel = new javax.swing.JLabel();
+        emojiScrollPane = new javax.swing.JScrollPane();
+        emojiPanel = new javax.swing.JPanel();
+        jButton1 = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
         resultPanel = new javax.swing.JPanel();
-        backButton = new javax.swing.JButton();
+        resultsScrollPane = new javax.swing.JScrollPane();
+        resultPane = new javax.swing.JPanel();
+        previousButton = new javax.swing.JButton();
         goButton = new javax.swing.JButton();
         pageSelect = new javax.swing.JComboBox<>();
         nextButton = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         tweetPanel = new javax.swing.JPanel();
         backToSearch = new javax.swing.JButton();
+        clearFiltersButton = new javax.swing.JButton();
+        pieChartButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new java.awt.CardLayout());
@@ -79,7 +107,12 @@ public class SearchGUI extends javax.swing.JFrame {
         searchButton.setText("Search");
         searchButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                searchButtonMouseClicked(evt);
+                try {
+                    searchButtonMouseClicked(evt);
+                } catch (ParseException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -168,6 +201,31 @@ public class SearchGUI extends javax.swing.JFrame {
         errorLabel.setText("Invalid Input!");
         errorLabel.setVisible(false);
 
+        emojiPanel.setBackground(new java.awt.Color(255, 255, 255));
+
+        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/displaytweets/twitter_logo.png"))); // NOI18N
+
+        javax.swing.GroupLayout emojiPanelLayout = new javax.swing.GroupLayout(emojiPanel);
+        emojiPanel.setLayout(emojiPanelLayout);
+        emojiPanelLayout.setHorizontalGroup(
+            emojiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(emojiPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        emojiPanelLayout.setVerticalGroup(
+            emojiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(emojiPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        emojiScrollPane.setViewportView(emojiPanel);
+
+        jLabel1.setText("Search by Emoji");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -199,64 +257,73 @@ public class SearchGUI extends javax.swing.JFrame {
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(incKeywords, javax.swing.GroupLayout.PREFERRED_SIZE, 226, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(hashtags, javax.swing.GroupLayout.PREFERRED_SIZE, 226, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(45, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel1)
+                    .addComponent(emojiScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(42, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(36, 36, 36)
-                        .addComponent(hashtagLabel))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(hashtags, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(keywordLabel)
-                    .addComponent(incKeywords, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(TotalSentimentLabel)
-                    .addComponent(minTotalScore, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(toLabel)
-                    .addComponent(maxTotalScore, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(advToggle)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(advSearchPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(searchButton)
-                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(noResultsLabel)
-                        .addComponent(errorLabel)))
-                .addGap(18, 18, 18))
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addGap(36, 36, 36)
+                                .addComponent(hashtagLabel))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(hashtags, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(keywordLabel)
+                            .addComponent(incKeywords, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(TotalSentimentLabel)
+                            .addComponent(minTotalScore, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(toLabel)
+                            .addComponent(maxTotalScore, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addComponent(advToggle)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(advSearchPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(searchButton)
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(noResultsLabel)
+                                .addComponent(errorLabel))))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(5, 5, 5)
+                        .addComponent(jLabel1)
+                        .addGap(11, 11, 11)
+                        .addComponent(emojiScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 276, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(33, Short.MAX_VALUE))
         );
 
-        jScrollPane1.setViewportView(jPanel2);
+        searchScrollPane.setViewportView(jPanel2);
 
         javax.swing.GroupLayout searchPanelLayout = new javax.swing.GroupLayout(searchPanel);
         searchPanel.setLayout(searchPanelLayout);
         searchPanelLayout.setHorizontalGroup(
             searchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(searchPanelLayout.createSequentialGroup()
-                .addComponent(jScrollPane1)
-                .addGap(0, 0, 0))
+            .addComponent(searchScrollPane)
         );
         searchPanelLayout.setVerticalGroup(
             searchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(searchPanelLayout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 325, Short.MAX_VALUE)
+                .addComponent(searchScrollPane)
                 .addGap(0, 0, 0))
         );
 
         getContentPane().add(searchPanel, "searchCard");
 
-        backButton.setText("Back");
-        backButton.addMouseListener(new java.awt.event.MouseAdapter() {
+        previousButton.setText("Previous Page");
+        previousButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                backButtonMouseClicked(evt);
+                previousButtonMouseClicked(evt);
             }
         });
 
@@ -267,7 +334,7 @@ public class SearchGUI extends javax.swing.JFrame {
             }
         });
 
-        nextButton.setText("Next");
+        nextButton.setText("Next Page");
         nextButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 nextButtonMouseClicked(evt);
@@ -285,34 +352,58 @@ public class SearchGUI extends javax.swing.JFrame {
             }
         });
 
-        javax.swing.GroupLayout resultPanelLayout = new javax.swing.GroupLayout(resultPanel);
-        resultPanel.setLayout(resultPanelLayout);
-        resultPanelLayout.setHorizontalGroup(
-            resultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(resultPanelLayout.createSequentialGroup()
+        clearFiltersButton.setText("Clear Filters");
+        clearFiltersButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                clearFiltersButtonMouseClicked(evt);
+            }
+        });
+
+        pieChartButton.setText(" Pie Chart");
+        pieChartButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                pieChartButtonMouseClicked(evt);
+            }
+        });
+
+        javax.swing.GroupLayout resultPaneLayout = new javax.swing.GroupLayout(resultPane);
+        resultPane.setLayout(resultPaneLayout);
+        resultPaneLayout.setHorizontalGroup(
+            resultPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(resultPaneLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(resultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2)
-                    .addGroup(resultPanelLayout.createSequentialGroup()
-                        .addComponent(backButton)
+                .addGroup(resultPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(resultPaneLayout.createSequentialGroup()
+                        .addComponent(previousButton)
                         .addGap(18, 18, 18)
                         .addComponent(pageSelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(goButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 67, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(backToSearch)
                         .addGap(18, 18, 18)
-                        .addComponent(nextButton)))
-                .addContainerGap())
-        );
-        resultPanelLayout.setVerticalGroup(
-            resultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, resultPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 257, Short.MAX_VALUE)
+                        .addComponent(nextButton))
+                    .addComponent(jScrollPane2))
                 .addGap(18, 18, 18)
-                .addGroup(resultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(backButton)
+                .addGroup(resultPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pieChartButton)
+                    .addComponent(clearFiltersButton))
+                .addContainerGap(39, Short.MAX_VALUE))
+        );
+        resultPaneLayout.setVerticalGroup(
+            resultPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, resultPaneLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(resultPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 273, Short.MAX_VALUE)
+                    .addGroup(resultPaneLayout.createSequentialGroup()
+                        .addComponent(pieChartButton)
+                        .addGap(18, 18, 18)
+                        .addComponent(clearFiltersButton)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addGap(18, 18, 18)
+                .addGroup(resultPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(previousButton)
                     .addComponent(goButton)
                     .addComponent(pageSelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(nextButton)
@@ -320,7 +411,24 @@ public class SearchGUI extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        getContentPane().add(resultPanel, "resultCard");
+        resultsScrollPane.setViewportView(resultPane);
+
+        javax.swing.GroupLayout resultPanelLayout = new javax.swing.GroupLayout(resultPanel);
+        resultPanel.setLayout(resultPanelLayout);
+        resultPanelLayout.setHorizontalGroup(
+            resultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 631, Short.MAX_VALUE)
+            .addGroup(resultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(resultsScrollPane, javax.swing.GroupLayout.Alignment.TRAILING))
+        );
+        resultPanelLayout.setVerticalGroup(
+            resultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 344, Short.MAX_VALUE)
+            .addGroup(resultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(resultsScrollPane, javax.swing.GroupLayout.Alignment.TRAILING))
+        );
+
+        getContentPane().add(resultPanel, "card4");
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -351,87 +459,173 @@ public class SearchGUI extends javax.swing.JFrame {
         errorLabel.setVisible(false);
     }
     // Search and call to switch the screen
-    private void searchButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_searchButtonMouseClicked
+private void searchButtonMouseClicked(java.awt.event.MouseEvent evt) throws ParseException {//GEN-FIRST:event_searchButtonMouseClicked
         noResultsLabel.setVisible(false);
         errorLabel.setVisible(false);
         // Get the text from the text fields
         
         // (Set unused ints to -1)
         int unused = -1;
-        String[] hashtagList = hashtags.getText().split(" ");
-        String[] incKeywordList = incKeywords.getText().split(" ");
         
-        int minTotal, maxTotal, minEmoji, maxEmoji, minText, maxText; 
-        if (!minTotalScore.getText().isEmpty()) {
-            try {
-                minTotal = Integer.parseInt(minTotalScore.getText());
-            } catch (NumberFormatException e) {
+        String mainQuery;
+        String totalSentimentQuery;
+        String textOnlySentimentQuery;
+        String emojiOnlySentimentQuery;
+        
+        // String Builder variables for formating the actual query
+        StringBuilder mainQueryBuilder = new StringBuilder();
+        StringBuilder totalSentimentScoreBuilder = new StringBuilder();
+        StringBuilder onlyTextSentimentScoreBuilder = new StringBuilder();
+        StringBuilder onlyEmojiSentimentScoreBuilder = new StringBuilder();
+        
+        // resetting the builders
+        totalSentimentScoreBuilder.delete(0, totalSentimentScoreBuilder.length());
+        onlyTextSentimentScoreBuilder.delete(0, onlyTextSentimentScoreBuilder.length());
+        onlyEmojiSentimentScoreBuilder.delete(0, onlyEmojiSentimentScoreBuilder.length());
+        
+/*
+ * The following Blocks will format the hash tags and keywords        
+ */
+        if (!hashtags.getText().isEmpty())
+        {
+        	String[] hashtagList = hashtags.getText().split(" ");
+        	for (int i = 0 ; i< hashtagList.length; i++)
+            {
+            	mainQueryBuilder.append("+#" + hashtagList[i] + " ");        	
+            }
+        	
+        }
+        	
+        if (!incKeywords.getText().isEmpty())
+        {
+        	String[] incKeywordList = incKeywords.getText().split(" ");   
+        	for (int i = 0 ; i< incKeywordList.length; i++)
+            {
+            	mainQueryBuilder.append("+" + incKeywordList[i] + " ");            	
+            }
+        	
+        }       
+        
+		if (!excKeywords.getText().isEmpty())
+        {
+        	String[] excKeywordList = excKeywords.getText().split(" ");   
+        	for (int i = 0 ; i< excKeywordList.length; i++)
+            {
+            	mainQueryBuilder.append("-" + excKeywordList[i] + " ");            	
+            }
+        	
+        }  
+        
+        System.out.println(mainQueryBuilder.toString());
+/*
+ *  the following block will format the query for total sentiment, 
+ *  text only and emoji only queries. 
+ *  
+ */
+        double minTotal = -1, maxTotal = -1, minEmoji = -1, maxEmoji = -1, minText = -1, maxText = -1; 
+        
+ 
+  // formatting total sentiment score query
+        
+        if ( minTotalScore.getText().isEmpty()){ }
+        else
+        {
+        	try{
+        		minTotal = Double.parseDouble(minTotalScore.getText());
+        	}catch (NumberFormatException e) {
                 errorLabel.setVisible(true);
             }
-        } else
-            minTotal = unused;
+        	
+        }
         
-        if (!maxTotalScore.getText().isEmpty()) {
-            try {
-                maxTotal = Integer.parseInt(maxTotalScore.getText());
-            } catch (NumberFormatException e) {
+        if (maxTotalScore.getText().isEmpty()) { }
+        else
+        {
+        	try{
+        		maxTotal = Double.parseDouble(maxTotalScore.getText());        		
+        	}catch (NumberFormatException e) {
                 errorLabel.setVisible(true);
             }
-        } else
-            maxTotal = unused;
+        }
         
-        // Advanced Options
-        String[] excKeywordList = excKeywords.getText().split(" ");
+  // formatting text sentiment score
         
-        if (!minEmojiScore.getText().isEmpty()) {
-            try {
-                minEmoji = Integer.parseInt(minEmojiScore.getText());
-            } catch (NumberFormatException e) {
+        if ( minTextScore.getText().isEmpty()){ }
+        else
+        {
+        	try{
+        		minText = Double.parseDouble(minTextScore.getText());
+        	}catch (NumberFormatException e) {
                 errorLabel.setVisible(true);
             }
-        } else
-            minEmoji = unused;
-         
-        if (!maxEmojiScore.getText().isEmpty()) {
-            try {
-                maxEmoji = Integer.parseInt(maxEmojiScore.getText());
-            } catch (NumberFormatException e) {
-                errorLabel.setVisible(true);
-            } 
-        } else
-            maxEmoji = unused;
+        	
+        }
         
-        if (!minTextScore.getText().isEmpty()) {
-            try {
-                minText = Integer.parseInt(minTextScore.getText());
-            } catch (NumberFormatException e) {
+        if (maxTextScore.getText().isEmpty()) { }
+        else
+        {
+        	try{
+        		maxText = Double.parseDouble(maxTextScore.getText());        		
+        	}catch (NumberFormatException e) {
                 errorLabel.setVisible(true);
             }
-        } else
-            minText = unused;
-
-        if (!maxTextScore.getText().isEmpty()) {
-            try {
-                maxText = Integer.parseInt(maxTextScore.getText());
-            } catch (NumberFormatException e) {
+        }
+        
+   // formatting emoji sentiment score
+        
+        if ( minEmojiScore.getText().isEmpty()){ }
+        else
+        {
+        	try{
+        		minEmoji = Double.parseDouble(minEmojiScore.getText());
+        	}catch (NumberFormatException e) {
                 errorLabel.setVisible(true);
             }
-        } else
-            maxText = unused;
+        	
+        }
+        
+        if (maxEmojiScore.getText().isEmpty()) { }
+        else
+        {
+        	try{
+        		maxEmoji = Double.parseDouble(maxEmojiScore.getText());        		
+        	}catch (NumberFormatException e) {
+                errorLabel.setVisible(true);
+            }
+        }
+        
               
         // Search if the input is all valid
         if(!errorLabel.isShowing()) {
-            
-            ////// INSERT SEARCH CALL HERE
+            //mainQuery =hashTagBuilder.append(incKeywordBuilder).toString(); 
+            mainQuery = mainQueryBuilder.toString(); 
+            totalSentimentQuery = totalSentimentScoreBuilder.toString();
+            textOnlySentimentQuery = onlyTextSentimentScoreBuilder.toString();
+            emojiOnlySentimentQuery = onlyEmojiSentimentScoreBuilder.toString();
+        	
+            simpleQueryObject.setMainQuery(mainQuery);
+        	simpleQueryObject.setMinTotalScore(minTotal);
+        	simpleQueryObject.setMaxTotalScore(maxTotal);
+        	simpleQueryObject.setMinTextScore(minText);
+        	simpleQueryObject.setMaxTextScore(maxText);
+        	simpleQueryObject.setMinEmojiScore(minEmoji);
+        	simpleQueryObject.setMaxEmojiScore(maxEmoji);
+        	
+            EmbeddedSearcher searchObject = new EmbeddedSearcher(simpleQueryObject);
 
-            /* PUT File List in this variable (however works)*/
-            File[] tweetResults = new File("").listFiles();
+            ArrayList<File> fileList = searchObject.initializeQueries();
+
+            System.out.println(fileList.size());
+            for (File file : fileList)
+            {
+                    System.out.println(file.toString());
+            }
+        	
             // Change the screen if tweets exist, display "No Results" if not
-            try {
-                Array.getLength(tweetResults);
-                setTweetList(tweetResults);
+            if ( fileList.size() > 0) {
+                setTweetList(fileList);
                 changeCard();
-            } catch (NullPointerException e) {
+            } else {
                 noResultsLabel.setVisible(true);
             }
         }
@@ -451,16 +645,21 @@ public class SearchGUI extends javax.swing.JFrame {
     
 // *** Result Panel ********************************************************
     
-    private File[] tweetList; // list of files to be displayed
+    private ArrayList<File> tweetList; // list of files to be displayed
+    
+////Start///////////////////////////////////////////////////////////////////
+    private ArrayList<File> filteredList;
+////End/////////////////////////////////////////////////////////////////////
+    
     private final int pageLen; // length of pages (number of tweets in a page)
     private int pageNum; // currently displayed page
     // Show last set of tweets
-    private void backButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_backButtonMouseClicked
+    private void previousButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_previousButtonMouseClicked
         if (pageNum > 0) {
             pageNum--;
             UpdateDisplay();
         }
-    }//GEN-LAST:event_backButtonMouseClicked
+    }//GEN-LAST:event_previousButtonMouseClicked
     // Show desired set of tweets
     private void goButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goButtonActionPerformed
         pageNum = pageSelect.getSelectedIndex();
@@ -468,7 +667,7 @@ public class SearchGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_goButtonActionPerformed
     // Show next set of tweets
     private void nextButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_nextButtonMouseClicked
-        if ((pageNum+1) * pageLen < Array.getLength(tweetList)) {
+        if ((pageNum+1) * pageLen < tweetList.size()) {
             pageNum++;
             UpdateDisplay();
         }
@@ -478,12 +677,23 @@ public class SearchGUI extends javax.swing.JFrame {
         clearLastSearch();
         changeCard();
     }//GEN-LAST:event_backToSearchMouseClicked
+    
+////Start///////////////////////////////////////////////////////////////////
+    private void pieChartButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pieChartButtonMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_pieChartButtonMouseClicked
+
+    private void clearFiltersButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_clearFiltersButtonMouseClicked
+        setTweetList(tweetList);
+    }//GEN-LAST:event_clearFiltersButtonMouseClicked
+////End/////////////////////////////////////////////////////////////////////
+    
     // Set the list of tweet files and update the display to show them
-    public void setTweetList(File [] tweets) {
+    public void setTweetList(ArrayList<File> tweets) {
         // Set the tweet files to show
         tweetList = tweets;
         // Set the page dropdown to number of pages
-        String[] pages = new String[(int)Math.ceil((double)Array.getLength(tweetList)/pageLen)];
+        String[] pages = new String[(int)Math.ceil((double)tweetList.size()/pageLen)];
         for (int i = 0; i < Array.getLength(pages); i++) {
             pages[i] = Integer.toString(i+1);
         }
@@ -498,9 +708,9 @@ public class SearchGUI extends javax.swing.JFrame {
         
         try {
         // Iterate through the files, displaying the tweets
-            for (int i = pageLen * pageNum; i < Integer.min((pageNum+1)*pageLen, Array.getLength(tweetList));i++) {
+            for (int i = pageLen * pageNum; i < Integer.min((pageNum+1)*pageLen, tweetList.size());i++) {
                 // Create Status Object from the file and add to panel
-                String rawJSON = readFirstLine(tweetList[i]);
+                String rawJSON = readFirstLine(tweetList.get(i));
                 Status tweet = TwitterObjectFactory.createStatus(rawJSON);              
                 TweetStatus stat = new TweetStatus(tweet);
                 tweetPanel.add(stat);
@@ -515,6 +725,46 @@ public class SearchGUI extends javax.swing.JFrame {
             System.exit(-1);
         }
     }
+    
+////Start///////////////////////////////////////////////////////////////////
+    // Set the list of filtered tweet files and update the display to show them
+        public void setFilteredList(ArrayList<File> tweets) {
+        // Set the tweet files to show
+        filteredList = tweets;
+        // Set the page dropdown to number of pages
+        String[] pages = new String[(int)Math.ceil((double)filteredList.size()/pageLen)];
+        for (int i = 0; i < Array.getLength(pages); i++) {
+            pages[i] = Integer.toString(i+1);
+        }
+        pageSelect.setModel(new javax.swing.DefaultComboBoxModel<>(pages));
+        
+        UpdateFilterDisplay();
+    }
+    // Display the tweets for the current page
+    private void UpdateFilterDisplay() {
+        // clear panel of previous page (if applicable)
+        tweetPanel.removeAll();
+        
+        try {
+        // Iterate through the files, displaying the tweets
+            for (int i = pageLen * pageNum; i < Integer.min((pageNum+1)*pageLen, filteredList.size());i++) {
+                // Create Status Object from the file and add to panel
+                String rawJSON = readFirstLine(filteredList.get(i));
+                Status tweet = TwitterObjectFactory.createStatus(rawJSON);              
+                TweetStatus stat = new TweetStatus(tweet);
+                tweetPanel.add(stat);
+            }
+            // make changes visible
+            tweetPanel.revalidate();
+          // Exceptions if errors in getting tweets
+        } catch (IOException ioe) {
+            System.out.println("Failed to store tweets: " + ioe.getMessage());
+        } catch (TwitterException te) {
+            System.out.println("Failed to get timeline: " + te.getMessage());
+            System.exit(-1);
+        }
+    }
+////End/////////////////////////////////////////////////////////////////////
     
     // method to retrieve the tweets from the files (UTF-8 format)
     // Copyright 2007 Yusuke Yamamoto
@@ -553,8 +803,10 @@ public class SearchGUI extends javax.swing.JFrame {
     private javax.swing.JLabel TotalSentimentLabel;
     private javax.swing.JPanel advSearchPanel;
     private javax.swing.JToggleButton advToggle;
-    private javax.swing.JButton backButton;
     private javax.swing.JButton backToSearch;
+    private javax.swing.JButton clearFiltersButton;
+    private javax.swing.JPanel emojiPanel;
+    private javax.swing.JScrollPane emojiScrollPane;
     private javax.swing.JLabel emojiSentimentLabel;
     private javax.swing.JLabel errorLabel;
     private javax.swing.JLabel excKeywordLabel;
@@ -563,8 +815,9 @@ public class SearchGUI extends javax.swing.JFrame {
     private javax.swing.JLabel hashtagLabel;
     private javax.swing.JTextField hashtags;
     private javax.swing.JTextField incKeywords;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel keywordLabel;
     private javax.swing.JTextField maxEmojiScore;
@@ -576,9 +829,14 @@ public class SearchGUI extends javax.swing.JFrame {
     private javax.swing.JButton nextButton;
     private javax.swing.JLabel noResultsLabel;
     private javax.swing.JComboBox<String> pageSelect;
+    private javax.swing.JButton pieChartButton;
+    private javax.swing.JButton previousButton;
+    private javax.swing.JPanel resultPane;
     private javax.swing.JPanel resultPanel;
+    private javax.swing.JScrollPane resultsScrollPane;
     private javax.swing.JButton searchButton;
     private javax.swing.JPanel searchPanel;
+    private javax.swing.JScrollPane searchScrollPane;
     private javax.swing.JLabel textSentimentLabel;
     private javax.swing.JLabel toLabel;
     private javax.swing.JLabel toLabel2;
