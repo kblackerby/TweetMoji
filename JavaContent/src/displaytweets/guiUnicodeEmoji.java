@@ -16,7 +16,7 @@ public class guiUnicodeEmoji {
      * @param inputCode
      * @return ArrayList <String>
      */
-    public static ArrayList<String> identifyEmojiCode(String inputCode) {
+    public static ArrayList<String> identifyEmojiCode(String inputCode) throws IOException {
 //        System.out.println("Original Input Code: "+inputCode);
 
         /**
@@ -34,7 +34,7 @@ public class guiUnicodeEmoji {
         String regionalIndicator = "[\uD83C\uDDE6-\uD83C\uDDFF]"; //Regional Indicator
         String fitzpatrickSupport = "[\uD83C\uDFFB-\uD83C\uDFFF]";  //Fitzparick Type 1&2-6-6*/
         String charCombo = "\u20E3"; //Combining Diacritical
-        String variationSelector = "[\uFE00-\uFE0F]"; //Variation Selector
+        String variationSelector = "\uFE0F"; //Variation Selector
         String heirarchy = "\u200D"; //Heirarchical
 
         String regexPattern = "[\uD83D\uDE01-\uD83D\uDE4F]|" + //Emoticons
@@ -49,10 +49,11 @@ public class guiUnicodeEmoji {
                 "[\u2B01-\u2BD1]|" + //Miscellaneous Symbols and Arrows
                 "[\u2122-\u2139]|" + //Arrows ++
                 "[\u2194-\u29AB]|" + //Arrows
-                "[\u0023-\u0039]"+charCombo+"|" + //Basic Latin
+                "[\u0023-\u0039]"+charCombo+"|[\u0023-\u0039]"+variationSelector+charCombo+"|" + //Basic Latin
                 "[\uD83C\uDD70-\uD83C\uDD9A]|\u24C2|" + //Enclosed Alphanumeric Supplement
                 "[\uD83C\uDE00-\uD83C\uDE51]|\u3297|\u3299|" + //Enclosed Ideographic Supplement
                 "[\uD83D\uDE00-\uD83D\uDE81]|" + //Additional emoticon
+                "[\uD83E\uDD10-\uD83E\uDDE2]|" + //most recent and expected range
                 regionalIndicator +"|"+ fitzpatrickSupport+"|"+ heirarchy +"|"+ variationSelector ;
 
         String stringIn = "";
@@ -67,8 +68,9 @@ public class guiUnicodeEmoji {
         Matcher matcher = pattern.matcher(stringIn);
 
         ArrayList<String> matchList = new ArrayList<>();
-        int addBuffer = 0;
-		
+        
+        int addBuffer = 0; // index of current character in input string
+        // separate the input text into text and emojis
         while (matcher.find()) {
             if(matcher.start() == addBuffer) {
                 matchList.add(matcher.group());
@@ -85,15 +87,11 @@ public class guiUnicodeEmoji {
         
     }
 
-    public static ArrayList<String> getCorrectEmojiList(String regionalIndicator, String charCombo, String variationSelector, String heirarchy, String fitzpatrickSupport, ArrayList<String> matchList) {
+    public static ArrayList<String> getCorrectEmojiList(String regionalIndicator, String charCombo, String variationSelector, String heirarchy, String fitzpatrickSupport, ArrayList<String> matchList) throws IOException {
         /**
          * sortUnicode sorts and combine hierarchical emoji unicode
          */
         sortUnicodeList(regionalIndicator, heirarchy, charCombo, variationSelector, fitzpatrickSupport, matchList);
-
-        //emoji directory
-        String  baseDir = System.getProperty("user.dir");
-        String emojiListFile = baseDir+"\\\\emojilist\\\\EmojiList.xls";
 
         for(int i=0;i<matchList.size();i++) {
             if ((!(matchList.get(i).startsWith("U+") || matchList.get(i).startsWith("TEXT")))) {
@@ -124,18 +122,24 @@ public class guiUnicodeEmoji {
      * @param matchListFormat
      * @return
      */
-    public static ArrayList<String> sortUnicodeList(String regionalIndicator, String heirarchy, String charCombo,
+    public static ArrayList<String> sortUnicodeList(String regionalIndicator, String hierarchy, String charCombo,
                                                     String variationSelector, String fitzpatrickSupport, ArrayList<String> matchListFormat) {
         for(int i=0;i<matchListFormat.size();i++) {
 
             //matchlist is Character Diacritical
-            if (matchListFormat.get(i).endsWith(charCombo)) {
+            if (matchListFormat.get(i).endsWith(variationSelector+charCombo)) {
+                matchListFormat.set(i, "U+00" + Long.toHexString(matchListFormat.get(i).codePointAt(0))
+                        + "U+" + Long.toHexString(variationSelector.codePointAt(0)) + "U+" + Long.toHexString(charCombo.codePointAt(0)));
+            } else if (matchListFormat.get(i).endsWith(charCombo)) {
                 matchListFormat.set(i, "U+00" + Long.toHexString(matchListFormat.get(i).codePointAt(0))
                         + "U+" + Long.toHexString(charCombo.codePointAt(0)));
             }
-
-            //matchlist is of Heirarchy
-            if (matchListFormat.get(i).matches(heirarchy) && !(matchListFormat.get(i+1).isEmpty())) {
+            //if the only value only in the array list is hierarchy
+            if(matchListFormat.size() == 1 && matchListFormat.get(i).equals(hierarchy)){
+                matchListFormat.remove(i);
+            }
+            //matchlist is of Hierarchy
+            if (matchListFormat.get(i).matches(hierarchy) && !(matchListFormat.get(i+1).isEmpty())) {
 
                 //if the previous item does not start with U+ add U+
                 if (!(matchListFormat.get(i-1).startsWith("U+"))){
@@ -153,7 +157,7 @@ public class guiUnicodeEmoji {
                 i--;
 
                 //variation Selector combines couples
-                if (matchListFormat.get(i).toUpperCase().startsWith("U+FE0F") && matchListFormat.get(i+1).equals(heirarchy)
+                if (matchListFormat.get(i).toUpperCase().startsWith("U+FE0F") && matchListFormat.get(i+1).equals(hierarchy)
                         && !(matchListFormat.get(i+1).isEmpty())) {
                     matchListFormat.set(i-1, matchListFormat.get(i-1) +matchListFormat.get(i));
                     matchListFormat.remove(i);
@@ -170,9 +174,12 @@ public class guiUnicodeEmoji {
             }
 
             //Remove unnecessary variationSelector
-            if (matchListFormat.get(i).matches(variationSelector) && !(matchListFormat.get(i+1).matches(heirarchy)) ){
+            if (matchListFormat.get(i).matches(variationSelector) && (i == (matchListFormat.size()-1))){
                 i--;
                 matchListFormat.remove(i+1);
+            } else if(matchListFormat.get(i).matches(variationSelector) && !(matchListFormat.get(i+1).matches(hierarchy))){
+                    i--;
+                    matchListFormat.remove(i+1);
             }
             
             // matchlist is fitzpatrick (NOT DISPLAYING FITZPATRICK, THE ORIGINAL IS USED FOR TIME SAKE)
