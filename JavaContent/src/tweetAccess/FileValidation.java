@@ -16,45 +16,34 @@ import java.util.Collections;
 public class FileValidation {
 
     /**
-     *
-     * @param directoryPath
-     * @return
+     * List the files present in a particular directory, it also looks at inner directories
+     * @param directoryPath Directory PAth
+     * @return ArrayList of  Files in the Directory
      */
-    public ArrayList<File> listTweetsInDirectory(String directoryPath){
-        //List the files present in a particular directory
-
+    public ArrayList<File> listJSONFilesInDirectory(String directoryPath){
         File parentDir;
         File[] fileName;
         File[] childDir;
         ArrayList<File> paths = new ArrayList<>();
 
         parentDir = new File(directoryPath);
+
         //for every file/folder in directory if the file is a directory, read form the folder
         // and return the file path as String
+        assert parentDir.listFiles() != null;
         for (File file: parentDir.listFiles()){
             if(file.isDirectory()){
                 System.out.println("Available Directory - "+file.getName());
                 childDir = file.listFiles(
-                        new FilenameFilter() {
-                            @Override
-                            public boolean accept(File dir, String name) {
-                                return name.endsWith("json");
-                            }
+                        (dir, name) -> {
+                            return name.endsWith("json");
                         });
                 Collections.addAll(paths, childDir);
                 }
         }
 
         fileName = parentDir.listFiles(
-                new FilenameFilter() {
-                    @Override
-                    public boolean accept(File dir, String name) {
-                        if (!new File(name).isDirectory()){
-                            return false;
-                        }
-                        return name.endsWith("json");
-                    }
-                });
+                (dir, name) -> new File(name).isDirectory() && name.endsWith("json"));
         Collections.addAll(paths, fileName);
 
         System.out.println("Reading File List: "+ paths.size()+" in Directory");
@@ -62,33 +51,22 @@ public class FileValidation {
         return paths;
     }
 
-    public ArrayList<File> listFileInDirectory(String directoryPath){
+    /**
+     * This is used to list .JPG files in a single dirc, - it pays no mind to inner directories
+     * @param directoryPath Directory PAth
+     * @return ArrayList of  Files in the Directory
+     */
+    public ArrayList<File> listJPEGFileInDirectory(String directoryPath){
         File parentDir = new File(directoryPath);
         ArrayList<File> fileName = new ArrayList<>(0);
         Collections.addAll(fileName, parentDir.
-                listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                if (new File(name).isDirectory()){
-                    return false;
-                }
-                //return only .JPG files
-                return name.endsWith("JPG");
-            }
-        }));
+                listFiles((dir, name) -> {
+                    if (new File(name).isDirectory()){
+                        return false;
+                    }
+                    //return only .JPG files
+                    return name.endsWith("JPG");
+                }));
         return fileName;
-    }
-
-    public static void main(String[] args) {
-
-        //main method was used to test FileValidation class
-        String baseDir = System.getProperty("user.dir");
-        String tweetDir = baseDir + "\\resources\\RankedTweet";
-
-
-        FileValidation fileValidation = new FileValidation();
-        fileValidation.listTweetsInDirectory(tweetDir);
-
-
     }
 }
