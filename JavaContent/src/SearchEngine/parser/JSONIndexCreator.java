@@ -31,7 +31,7 @@ public class JSONIndexCreator {
 	/***************************************************************************************************
 	 *  Variable List                                                                                  *                       
 	 ***************************************************************************************************/	
-	private static String datastore = "C:\\Users\\Pareshan\\Downloads\\datastore";
+	private static String datastore = "C:\\Users\\Pareshan\\Downloads\\RankedTweet";
 	private IndexWriter indexWriter = null;
 	private StandardAnalyzer analyzer;
 	private Directory index;
@@ -96,11 +96,12 @@ public class JSONIndexCreator {
 	       	             && fileEntry.canRead()
 	    	             && fileEntry.length() > 0.0 )
 	        	 {
+	        		 
 	        		 readJSONFile(fileEntry); 
 	        	 }
 	        	 else
 	        	 {
-	        		 System.out.println(fileEntry.getName() + " is not a .JSON file");
+	        		 System.out.println(fileEntry.getName() + " is not a .JSON file OR is empty");
 	        	 }
 	        	 
 	         }
@@ -131,18 +132,109 @@ public class JSONIndexCreator {
 			
 			while ((currentLine = jsonReader.readLine()) != null)
 			{
+				
 				jsonCotent.append(currentLine);
 			}
 			
 			currentLine = jsonCotent.toString();
+			// for Extracting Text
+			String place = "\"place\":";
+			String text = "\"text\":";
+
+			int placeStartLocation = currentLine.indexOf(place);
+			int textStartLocation = 0;
+			int temp = 0;	
 			
-			int textStartLocation = currentLine.indexOf("text");
-			int sourceStartLocation = currentLine.indexOf("source");
-			int startLocation = textStartLocation + SEVEN;
-			int endLocation = sourceStartLocation - THREE;
+			if (placeStartLocation == -1)
+			{
+				System.out.println("File Path: " + fileEntry.getAbsolutePath());
+				System.out.println("File Name: " + fileEntry.toString());
+				System.out.println("Error Message: File not formatted correctly - No place");
+			}
+			else
+			{
+				
 			
-			String textValue = currentLine.substring(startLocation, endLocation);
-			createIndex(fileEntry,textValue);
+
+				while(temp < placeStartLocation && temp != currentLine.indexOf(text) )
+				{	
+
+					textStartLocation = temp;				
+					temp = currentLine.indexOf(text, textStartLocation + 7); 
+				}
+
+				int startLocation = textStartLocation + 8;
+				int endLocation = placeStartLocation - 2;
+
+
+
+				String textValue = currentLine.substring(startLocation, endLocation);
+
+//				System.out.println(textValue);
+
+
+
+				// for Extracting sentiment Scores
+
+				String totalSentiment = "\"total_sentiment_rank_str\":";
+				String textSentimen = "\"text_sentiment_rank_str\":";
+				String emojiSentiment = "\"emoji_sentiment_rank\":";
+
+				int totalSentimentScoreStartLocation = currentLine.indexOf(totalSentiment);
+				int totalSentimentScoreEndLocation = currentLine.indexOf(",", totalSentimentScoreStartLocation);
+				int textSentimentScoreStartLocation = currentLine.indexOf(textSentimen);
+				int textSentimentScoreEndLocation = currentLine.indexOf(",", textSentimentScoreStartLocation);
+				int emojiSentimentScoreStartLocation = currentLine.indexOf(emojiSentiment);
+				int emojiSentimentScoreEndLocation = currentLine.indexOf(",", emojiSentimentScoreStartLocation);
+
+				String totalSentimentValue = null;
+				String textSentimentValue =  null;
+				String emojiSentimentValue = null;
+
+//				System.out.println(totalSentimentScoreStartLocation);
+//
+//				System.out.println(textSentimentScoreStartLocation);
+//
+//				System.out.println(emojiSentimentScoreStartLocation);
+
+				if (totalSentimentScoreStartLocation == -1 || textSentimentScoreStartLocation == -1 || emojiSentimentScoreStartLocation == -1 )
+				{
+					totalSentimentValue = "-2";
+					textSentimentValue =  "-2";
+					emojiSentimentValue = "-2"; 
+
+
+				}
+				else
+				{
+					totalSentimentValue = currentLine.substring(totalSentimentScoreStartLocation + 28, totalSentimentScoreEndLocation-1);
+					textSentimentValue = currentLine.substring(textSentimentScoreStartLocation + 27 , textSentimentScoreEndLocation-1);
+					emojiSentimentValue = currentLine.substring(emojiSentimentScoreStartLocation + 23 , emojiSentimentScoreEndLocation); 
+
+					if (totalSentimentValue.equals("null"))
+					{
+						totalSentimentValue = "-1";
+					}
+					if (textSentimentValue.equals("null"))
+					{
+						textSentimentValue = "-1";
+					}
+					if (emojiSentimentValue.equals("null"))
+					{
+						emojiSentimentValue = "-1";
+					}
+
+//					System.out.println(totalSentimentValue);
+//					System.out.println(textSentimentValue);
+//					System.out.println(emojiSentimentValue);
+
+				}
+
+
+				createIndex(fileEntry,textValue,totalSentimentValue,textSentimentValue,emojiSentimentValue);
+			}
+			
+			
 		} catch (IOException e) {
 			
 			e.printStackTrace();
@@ -162,7 +254,7 @@ public class JSONIndexCreator {
 	 *  Returns    : void                                                                              *                                                                                             *
 	 *  Called by  : readJSONFile                                                                      *	                                                                                          
 	 ***************************************************************************************************/
-	public void createIndex(File file, String textField)
+	public void createIndex(File file, String textField, String totalSentimentValue, String textSentimentValue, String emojiSentimentValue)
 	{
 				Document doc = new Document();
 				
@@ -173,9 +265,9 @@ public class JSONIndexCreator {
 			     //System.out.println(name);
 			     //System.out.println(file.getName());
 			     doc.add(new TextField("text", textField, Field.Store.YES));
-			     doc.add(new Field("totalscore", "3.5", Field.Store.YES, Field.Index.ANALYZED));
-			     doc.add(new Field("textscore", "4.0", Field.Store.YES, Field.Index.ANALYZED));
-			     doc.add(new Field("emojiscore", "5.0", Field.Store.YES, Field.Index.ANALYZED));
+			     doc.add(new Field("totalscore",totalSentimentValue , Field.Store.YES, Field.Index.ANALYZED));
+			     doc.add(new Field("textscore", textSentimentValue, Field.Store.YES, Field.Index.ANALYZED));
+			     doc.add(new Field("emojiscore",emojiSentimentValue , Field.Store.YES, Field.Index.ANALYZED));
 				 doc.add(new Field("nameOfFile", file.getName(), Field.Store.YES, Field.Index.ANALYZED));
 				 doc.add(new Field("filepath", file.getAbsolutePath(), Field.Store.YES, Field.Index.ANALYZED));
 			     if (doc != null) 
@@ -186,7 +278,7 @@ public class JSONIndexCreator {
 			    		//System.out.println(doc.toString());
 			    		indexWriter.addDocument(doc);
 			    		//System.out.println(doc.toString());
-			    		//System.out.println(file.getName() + " indexed successfully");
+//			    		System.out.println(file.getName() + " indexed successfully");
 					 }
 			    	 catch (IOException e)
 			    	 {
