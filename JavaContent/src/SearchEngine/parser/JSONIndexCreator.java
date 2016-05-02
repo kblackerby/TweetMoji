@@ -31,7 +31,7 @@ public class JSONIndexCreator {
 	/***************************************************************************************************
 	 *  Variable List                                                                                  *                       
 	 ***************************************************************************************************/	
-	private static String datastore = "./Tweets";
+	private static String datastore = "C:\\Users\\Pareshan\\Downloads\\datastore";
 	private IndexWriter indexWriter = null;
 	private StandardAnalyzer analyzer;
 	private Directory index;
@@ -48,7 +48,7 @@ public class JSONIndexCreator {
 	{
 		
 		analyzer = new StandardAnalyzer();
-		Path p = Paths.get("./Index");
+		Path p = Paths.get("C:/Users/Pareshan/Downloads/testindex");
 		try {
 			dir = FSDirectory.open(p);
 			IndexWriterConfig config = new IndexWriterConfig(analyzer);
