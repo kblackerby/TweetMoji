@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  * Created by Bukunmi on 3/17/2016.
  * Modified by Kenan on 4/6/2016 for GUI use.
  */
-public class guiUnicodeEmoji {
+public class GUI_UnicodeEmoji {
 
     /**
      * The method checks the string pattern of the tweet and returns the emoji code

@@ -2,26 +2,26 @@ package displaytweets;
 
 import java.awt.CardLayout;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
-import java.security.Security;
 import java.util.ArrayList;
 
-import org.apache.lucene.document.Document;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.search.ScoreDoc;
 
 import query.SimpleQueryHolder;
 import searchers.EmbeddedSearcher;
 
 import twitter4j.Status;
-import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterObjectFactory;
+
+import UnicodeConverter.UnicodeConverter;
+import java.util.Arrays;
 
 /**
  *
@@ -37,18 +37,18 @@ public class SearchGUI extends javax.swing.JFrame {
      */
     public SearchGUI() {
         initComponents();
-        
+        initEmojiButtons();
         // Results Variables
         pageLen = 10;
-        pageNum = 0; // first page
+        pageNum = 0; // first page  
     }
     public SearchGUI(int pL) {
-            initComponents();
-
-            // Results Variables
-            pageLen = pL;
-            pageNum = 0; // first page
-        }
+        initComponents();
+        initEmojiButtons();
+        // Results Variables
+        pageLen = pL;
+        pageNum = 0; // first page
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -86,7 +86,6 @@ public class SearchGUI extends javax.swing.JFrame {
         errorLabel = new javax.swing.JLabel();
         emojiScrollPane = new javax.swing.JScrollPane();
         emojiPanel = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         resultPanel = new javax.swing.JPanel();
         resultsScrollPane = new javax.swing.JScrollPane();
@@ -202,26 +201,7 @@ public class SearchGUI extends javax.swing.JFrame {
         errorLabel.setVisible(false);
 
         emojiPanel.setBackground(new java.awt.Color(255, 255, 255));
-
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/displaytweets/twitter_logo.png"))); // NOI18N
-
-        javax.swing.GroupLayout emojiPanelLayout = new javax.swing.GroupLayout(emojiPanel);
-        emojiPanel.setLayout(emojiPanelLayout);
-        emojiPanelLayout.setHorizontalGroup(
-            emojiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(emojiPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        emojiPanelLayout.setVerticalGroup(
-            emojiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(emojiPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
+        emojiPanel.setLayout(new java.awt.GridBagLayout());
         emojiScrollPane.setViewportView(emojiPanel);
 
         jLabel1.setText("Search by Emoji");
@@ -432,7 +412,32 @@ public class SearchGUI extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+    // Create the Emoji Menu
+    private void initEmojiButtons() {
+        buttonList = new ArrayList<>();
+        File[] emojiList = new File("./Pics").listFiles();
+        int rowLen = 2;
+        int row = 0, col = 0;
+        for(File emoji : emojiList) {
+            if(emoji.isFile()) {
+                EmojiButton b = new EmojiButton(emoji);
+                buttonList.add(b);
+                GridBagConstraints c = new GridBagConstraints();
+                c.gridx = col;
+                c.gridy = row;
+                c.weightx = 0.5;
+                c.weighty = 0.5;
+                emojiPanel.add(b,c);
+                if(col < rowLen-1)
+                    col++;
+                else {
+                    col = 0;
+                    row++;
+                }
+            }
+        }
+    }
+    
     // Change to next screen
     private void changeCard() {
         CardLayout cl = (CardLayout) getContentPane().getLayout();
@@ -441,13 +446,16 @@ public class SearchGUI extends javax.swing.JFrame {
     
 
 // *** Search Panel ********************************************************
-    
+    ArrayList<EmojiButton> buttonList;
     // Clear the search parameters from the text fields
     private void clearLastSearch() {
         hashtags.setText("");
         incKeywords.setText("");
         minTotalScore.setText("");
         maxTotalScore.setText("");
+        buttonList.stream().forEach((b) -> {
+            b.setSelected(false);
+            });
         // Advanced Options
         excKeywords.setText("");
         minEmojiScore.setText("");
@@ -457,144 +465,145 @@ public class SearchGUI extends javax.swing.JFrame {
         // Clear any residual error message
         noResultsLabel.setVisible(false);
         errorLabel.setVisible(false);
+        // Minimize the Advanced Search
+        advToggle.setSelected(false);
+        advSearchPanel.setPreferredSize(new Dimension());
+        advSearchPanel.revalidate();
     }
     // Search and call to switch the screen
-private void searchButtonMouseClicked(java.awt.event.MouseEvent evt) throws ParseException {//GEN-FIRST:event_searchButtonMouseClicked
+    private void searchButtonMouseClicked(java.awt.event.MouseEvent evt) throws ParseException {//GEN-FIRST:event_searchButtonMouseClicked
         noResultsLabel.setVisible(false);
         errorLabel.setVisible(false);
         // Get the text from the text fields
-        
+
         // (Set unused ints to -1)
         int unused = -1;
-        
+
         String mainQuery;
         String totalSentimentQuery;
         String textOnlySentimentQuery;
         String emojiOnlySentimentQuery;
-        
+
         // String Builder variables for formating the actual query
         StringBuilder mainQueryBuilder = new StringBuilder();
         StringBuilder totalSentimentScoreBuilder = new StringBuilder();
         StringBuilder onlyTextSentimentScoreBuilder = new StringBuilder();
         StringBuilder onlyEmojiSentimentScoreBuilder = new StringBuilder();
-        
+
         // resetting the builders
         totalSentimentScoreBuilder.delete(0, totalSentimentScoreBuilder.length());
         onlyTextSentimentScoreBuilder.delete(0, onlyTextSentimentScoreBuilder.length());
         onlyEmojiSentimentScoreBuilder.delete(0, onlyEmojiSentimentScoreBuilder.length());
-        
-/*
- * The following Blocks will format the hash tags and keywords        
- */
+
+    /*
+    * The following Blocks will format the hash tags and keywords        
+    */
         if (!hashtags.getText().isEmpty())
         {
-        	String[] hashtagList = hashtags.getText().split(" ");
-        	for (int i = 0 ; i< hashtagList.length; i++)
-            {
-            	mainQueryBuilder.append("+#" + hashtagList[i] + " ");        	
+            String[] hashtagList = hashtags.getText().split(" ");
+            for (String hashtagList1 : hashtagList) {
+                mainQueryBuilder.append("+#").append(hashtagList1).append(" ");        	
             }
-        	
         }
-        	
+
         if (!incKeywords.getText().isEmpty())
         {
-        	String[] incKeywordList = incKeywords.getText().split(" ");   
-        	for (int i = 0 ; i< incKeywordList.length; i++)
-            {
-            	mainQueryBuilder.append("+" + incKeywordList[i] + " ");            	
+            String[] incKeywordList = incKeywords.getText().split(" ");   
+            for (String incKeywordList1 : incKeywordList) {
+                mainQueryBuilder.append("+").append(incKeywordList1).append(" ");            	
             }
-        	
         }       
-        
-		if (!excKeywords.getText().isEmpty())
+
+        if (!excKeywords.getText().isEmpty())
         {
-        	String[] excKeywordList = excKeywords.getText().split(" ");   
-        	for (int i = 0 ; i< excKeywordList.length; i++)
-            {
-            	mainQueryBuilder.append("-" + excKeywordList[i] + " ");            	
+            String[] excKeywordList = excKeywords.getText().split(" ");   
+            for (String excKeywordList1 : excKeywordList) {
+                mainQueryBuilder.append("-").append(excKeywordList1).append(" ");            	
             }
-        	
         }  
-        
+
         System.out.println(mainQueryBuilder.toString());
-/*
- *  the following block will format the query for total sentiment, 
- *  text only and emoji only queries. 
- *  
- */
+    /*
+    *  the following block will format the query for total sentiment, 
+    *  text only and emoji only queries. 
+    *  
+    */
         double minTotal = -1, maxTotal = -1, minEmoji = -1, maxEmoji = -1, minText = -1, maxText = -1; 
-        
- 
-  // formatting total sentiment score query
-        
-        if ( minTotalScore.getText().isEmpty()){ }
-        else
+
+    // formatting total sentiment score query
+        if (!minTotalScore.getText().isEmpty())
         {
-        	try{
-        		minTotal = Double.parseDouble(minTotalScore.getText());
-        	}catch (NumberFormatException e) {
-                errorLabel.setVisible(true);
-            }
-        	
-        }
-        
-        if (maxTotalScore.getText().isEmpty()) { }
-        else
-        {
-        	try{
-        		maxTotal = Double.parseDouble(maxTotalScore.getText());        		
-        	}catch (NumberFormatException e) {
-                errorLabel.setVisible(true);
+            try{
+                minTotal = Double.parseDouble(minTotalScore.getText());
+            }catch (NumberFormatException e) {
+            errorLabel.setVisible(true);
             }
         }
-        
-  // formatting text sentiment score
-        
-        if ( minTextScore.getText().isEmpty()){ }
-        else
+
+        if (!maxTotalScore.getText().isEmpty())
         {
-        	try{
-        		minText = Double.parseDouble(minTextScore.getText());
-        	}catch (NumberFormatException e) {
-                errorLabel.setVisible(true);
-            }
-        	
-        }
-        
-        if (maxTextScore.getText().isEmpty()) { }
-        else
-        {
-        	try{
-        		maxText = Double.parseDouble(maxTextScore.getText());        		
-        	}catch (NumberFormatException e) {
-                errorLabel.setVisible(true);
+            try{
+                maxTotal = Double.parseDouble(maxTotalScore.getText());        		
+            }catch (NumberFormatException e) {
+            errorLabel.setVisible(true);
             }
         }
-        
-   // formatting emoji sentiment score
-        
-        if ( minEmojiScore.getText().isEmpty()){ }
-        else
+
+    // formatting text sentiment score
+        if (!minTextScore.getText().isEmpty())
         {
-        	try{
-        		minEmoji = Double.parseDouble(minEmojiScore.getText());
-        	}catch (NumberFormatException e) {
-                errorLabel.setVisible(true);
-            }
-        	
-        }
-        
-        if (maxEmojiScore.getText().isEmpty()) { }
-        else
-        {
-        	try{
-        		maxEmoji = Double.parseDouble(maxEmojiScore.getText());        		
-        	}catch (NumberFormatException e) {
-                errorLabel.setVisible(true);
+            try{
+                minText = Double.parseDouble(minTextScore.getText());
+            }catch (NumberFormatException e) {
+            errorLabel.setVisible(true);
             }
         }
+
+        if (!maxTextScore.getText().isEmpty())
+        {
+            try{
+                maxText = Double.parseDouble(maxTextScore.getText());        		
+            }catch (NumberFormatException e) {
+            errorLabel.setVisible(true);
+            }
+        }
+
+    // formatting emoji sentiment score
+        if (!minEmojiScore.getText().isEmpty())
+        {
+            try{
+                minEmoji = Double.parseDouble(minEmojiScore.getText());
+            }catch (NumberFormatException e) {
+            errorLabel.setVisible(true);
+            }
+        }
+
+        if (!maxEmojiScore.getText().isEmpty())
+        {
+            try{
+                maxEmoji = Double.parseDouble(maxEmojiScore.getText());        		
+            }catch (NumberFormatException e) {
+            errorLabel.setVisible(true);
+            }
+        }
+
+        // Search and compile list of selected Emoji Buttons
+        ArrayList selectedEmojis = new ArrayList<>();
+        buttonList.stream().forEach((EmojiButton b) -> {
+            if(b.isSelected()) {
+                String[] result32 = b.getImgName().split("U");
+                for(String r : result32) {
+                    if (!r.isEmpty()) {
+                        String results16 = UnicodeConverter.convert32to16(r.replace("+","0x"));
+                        
+                        for (int i = 0; i < results16.length(); i++) {
+                            selectedEmojis.add(results16.charAt(i));
+                        }
+                    }
+                }
+            }
+            });
         
-              
         // Search if the input is all valid
         if(!errorLabel.isShowing()) {
             //mainQuery =hashTagBuilder.append(incKeywordBuilder).toString(); 
@@ -602,24 +611,23 @@ private void searchButtonMouseClicked(java.awt.event.MouseEvent evt) throws Pars
             totalSentimentQuery = totalSentimentScoreBuilder.toString();
             textOnlySentimentQuery = onlyTextSentimentScoreBuilder.toString();
             emojiOnlySentimentQuery = onlyEmojiSentimentScoreBuilder.toString();
-        	
+
             simpleQueryObject.setMainQuery(mainQuery);
-        	simpleQueryObject.setMinTotalScore(minTotal);
-        	simpleQueryObject.setMaxTotalScore(maxTotal);
-        	simpleQueryObject.setMinTextScore(minText);
-        	simpleQueryObject.setMaxTextScore(maxText);
-        	simpleQueryObject.setMinEmojiScore(minEmoji);
-        	simpleQueryObject.setMaxEmojiScore(maxEmoji);
+            simpleQueryObject.setMinTotalScore(minTotal);
+            simpleQueryObject.setMaxTotalScore(maxTotal);
+            simpleQueryObject.setMinTextScore(minText);
+            simpleQueryObject.setMaxTextScore(maxText);
+            simpleQueryObject.setMinEmojiScore(minEmoji);
+            simpleQueryObject.setMaxEmojiScore(maxEmoji);
         	
             EmbeddedSearcher searchObject = new EmbeddedSearcher(simpleQueryObject);
 
             ArrayList<File> fileList = searchObject.initializeQueries();
 
             System.out.println(fileList.size());
-            for (File file : fileList)
-            {
-                    System.out.println(file.toString());
-            }
+            fileList.stream().forEach((file) -> {
+                System.out.println(file.toString());
+            });
         	
             // Change the screen if tweets exist, display "No Results" if not
             if ( fileList.size() > 0) {
@@ -646,10 +654,7 @@ private void searchButtonMouseClicked(java.awt.event.MouseEvent evt) throws Pars
 // *** Result Panel ********************************************************
     
     private ArrayList<File> tweetList; // list of files to be displayed
-    
-////Start///////////////////////////////////////////////////////////////////
     private ArrayList<File> filteredList;
-////End/////////////////////////////////////////////////////////////////////
     
     private final int pageLen; // length of pages (number of tweets in a page)
     private int pageNum; // currently displayed page
@@ -678,7 +683,6 @@ private void searchButtonMouseClicked(java.awt.event.MouseEvent evt) throws Pars
         changeCard();
     }//GEN-LAST:event_backToSearchMouseClicked
     
-////Start///////////////////////////////////////////////////////////////////
     private void pieChartButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pieChartButtonMouseClicked
         // TODO add your handling code here:
     }//GEN-LAST:event_pieChartButtonMouseClicked
@@ -686,7 +690,6 @@ private void searchButtonMouseClicked(java.awt.event.MouseEvent evt) throws Pars
     private void clearFiltersButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_clearFiltersButtonMouseClicked
         setTweetList(tweetList);
     }//GEN-LAST:event_clearFiltersButtonMouseClicked
-////End/////////////////////////////////////////////////////////////////////
     
     // Set the list of tweet files and update the display to show them
     public void setTweetList(ArrayList<File> tweets) {
@@ -725,8 +728,6 @@ private void searchButtonMouseClicked(java.awt.event.MouseEvent evt) throws Pars
             System.exit(-1);
         }
     }
-    
-////Start///////////////////////////////////////////////////////////////////
     // Set the list of filtered tweet files and update the display to show them
         public void setFilteredList(ArrayList<File> tweets) {
         // Set the tweet files to show
@@ -764,7 +765,6 @@ private void searchButtonMouseClicked(java.awt.event.MouseEvent evt) throws Pars
             System.exit(-1);
         }
     }
-////End/////////////////////////////////////////////////////////////////////
     
     // method to retrieve the tweets from the files (UTF-8 format)
     // Copyright 2007 Yusuke Yamamoto
@@ -815,7 +815,6 @@ private void searchButtonMouseClicked(java.awt.event.MouseEvent evt) throws Pars
     private javax.swing.JLabel hashtagLabel;
     private javax.swing.JTextField hashtags;
     private javax.swing.JTextField incKeywords;
-    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane2;

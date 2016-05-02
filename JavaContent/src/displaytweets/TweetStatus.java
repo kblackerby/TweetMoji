@@ -49,7 +49,7 @@ public class TweetStatus extends javax.swing.JPanel {
         date.setText(createdAt.toString());
         
         
-        ArrayList<String> textList = guiUnicodeEmoji.identifyEmojiCode(tweetText);
+        ArrayList<String> textList = GUI_UnicodeEmoji.identifyEmojiCode(tweetText);
         
         if(textList.isEmpty())
             jPanel1.add(new JLabel(tweetText));
@@ -65,7 +65,8 @@ public class TweetStatus extends javax.swing.JPanel {
                 BufferedImage img;
                 try {
                     File f = new File(System.getProperty("user.dir"));
-                    String picDir = f.getParentFile().getParent() + "/emojilist/Pics/";
+                    // String picDir = f.getParentFile().getParent() + "/emojilist/Pics/";
+                    String picDir = f.getPath() + "/Pics/";
                     img = ImageIO.read(new File(picDir + textList.get(i).replace("U+", "")+".jpg"));
                 } catch (IOException e) {
                     img = new BufferedImage(iconWidth, iconHeight, BufferedImage.TYPE_3BYTE_BGR);
@@ -109,7 +110,7 @@ public class TweetStatus extends javax.swing.JPanel {
 //        // Print the tweet in the Console --- FOR TEST *****
 //        System.out.println("@" + retweeted.getUser().getScreenName() + " - " + tweetText);
         
-        ArrayList<String> textList = guiUnicodeEmoji.identifyEmojiCode(tweetText);
+        ArrayList<String> textList = GUI_UnicodeEmoji.identifyEmojiCode(tweetText);
         javax.swing.JLabel text = new JLabel();
         if(textList.isEmpty())
             text.setText(tweetText);
@@ -125,7 +126,7 @@ public class TweetStatus extends javax.swing.JPanel {
                 BufferedImage img;
                 try {
                     File f = new File(System.getProperty("user.dir"));
-                    String picDir = f.getParentFile().getParent() + "/emojilist/Pics/";
+                    String picDir = f.getPath() + "/Pics/";
                     img = ImageIO.read(new File(picDir + textList.get(i).replace("U+", "")+".jpg"));
                 } catch (IOException e) {
                     img = new BufferedImage(iconWidth, iconHeight, BufferedImage.TYPE_3BYTE_BGR);
