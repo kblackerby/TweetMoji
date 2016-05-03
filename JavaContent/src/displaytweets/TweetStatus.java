@@ -17,20 +17,35 @@ import java.util.Date;
 import javax.imageio.ImageIO;
 import javax.swing.JLabel;
 import twitter4j.Status;
+import twitter4j.TwitterException;
+import twitter4j.TwitterObjectFactory;
 
 public class TweetStatus extends javax.swing.JPanel {
 
+    private String totalSentimentValue;
+    private String textSentimentValue;
+    private String emojiSentimentValue;
+    private String rawTweet;
+    
     /**
      * Creates new form tweetstatus
      * @param tweet
      */
-    public TweetStatus(Status tweet) throws IOException {
+    public TweetStatus(String raw) throws IOException {
         initComponents();
-        // Check for retweet and fill tweet accordingly
-        if(tweet.isRetweet())
-            fillInRetweet(tweet);
-        else
-            fillInTweet(tweet);
+        try {
+            rawTweet = raw;
+            Status tweet = TwitterObjectFactory.createStatus(raw);
+            
+            // Check for retweet and fill tweet accordingly
+            if(tweet.isRetweet())
+                fillInRetweet(tweet);
+            else
+                fillInTweet(tweet);
+        } catch (TwitterException te) {
+            System.out.println("Failed to get timeline: " + te.getMessage());
+            System.exit(-1);
+        }
     }
 
     // Fills in the Tweet form with the tweet information 
@@ -47,6 +62,28 @@ public class TweetStatus extends javax.swing.JPanel {
         username.setText(uname);
         screenname.setText("@" + sname);
         date.setText(createdAt.toString());
+        
+        getScores(rawTweet);
+        if (totalSentimentValue.equals("") || totalSentimentValue.equals("-2")) {
+            totScore.setSize(new Dimension());
+            totScoreLabel.setVisible(false);
+        }
+        else
+            totScore.setText(totalSentimentValue);
+        
+        if (emojiSentimentValue.equals("") || emojiSentimentValue.equals("-2")) {
+            emojiScore.setSize(new Dimension());
+            emojiScoreLabel.setVisible(false);
+        }
+        else
+            emojiScore.setText(emojiSentimentValue);
+        
+        if (textSentimentValue.equals("") || textSentimentValue.equals("-2")) {
+            textScore.setSize(new Dimension());
+            textScoreLabel.setVisible(false);
+        }
+        else
+            textScore.setText(textSentimentValue);
         
         
         ArrayList<String> textList = GUI_UnicodeEmoji.identifyEmojiCode(tweetText);
@@ -90,7 +127,7 @@ public class TweetStatus extends javax.swing.JPanel {
         
         retweetPanel.setPreferredSize(new Dimension());
     }
-    
+        
     // Fills in the Tweet form with the tweet information 
     private void fillInRetweet(Status tweet) throws IOException {     
         // Get the username, screen name, and text for the tweet
@@ -106,7 +143,29 @@ public class TweetStatus extends javax.swing.JPanel {
         String tweetText = retweeted.getText();
         username_r.setText(retweeted.getUser().getName());
         screenname_r.setText("@" + retweeted.getUser().getScreenName());
-
+        
+        getScores(rawTweet);
+        if (totalSentimentValue.equals("") || totalSentimentValue.equals("-2")) {
+            totScore.setSize(new Dimension());
+            totScoreLabel.setVisible(false);
+        }
+        else
+            totScore.setText(totalSentimentValue);
+        
+        if (emojiSentimentValue.equals("") || emojiSentimentValue.equals("-2")) {
+            emojiScore.setSize(new Dimension());
+            emojiScoreLabel.setVisible(false);
+        }
+        else
+            emojiScore.setText(emojiSentimentValue);
+        
+        if (textSentimentValue.equals("") || textSentimentValue.equals("-2")) {
+            textScore.setSize(new Dimension());
+            textScoreLabel.setVisible(false);
+        }
+        else
+            textScore.setText(textSentimentValue);
+        
 //        // Print the tweet in the Console --- FOR TEST *****
 //        System.out.println("@" + retweeted.getUser().getScreenName() + " - " + tweetText);
         
@@ -147,6 +206,42 @@ public class TweetStatus extends javax.swing.JPanel {
         }
     }
     
+     // for Extracting sentiment Scores From Roshan in JSONIndexCreator.java
+    private void getScores(String currentLine) {
+
+        String totalSentiment = "\"total_sentiment_rank_str\":";
+        String textSentimen = "\"text_sentiment_rank_str\":";
+        String emojiSentiment = "\"emoji_sentiment_rank\":";
+
+        int totalSentimentScoreStartLocation = currentLine.indexOf(totalSentiment);
+        int totalSentimentScoreEndLocation = currentLine.indexOf(",", totalSentimentScoreStartLocation);
+        int textSentimentScoreStartLocation = currentLine.indexOf(textSentimen);
+        int textSentimentScoreEndLocation = currentLine.indexOf(",", textSentimentScoreStartLocation);
+        int emojiSentimentScoreStartLocation = currentLine.indexOf(emojiSentiment);
+        int emojiSentimentScoreEndLocation = currentLine.indexOf(",", emojiSentimentScoreStartLocation);
+
+        if (totalSentimentScoreStartLocation == -1 || textSentimentScoreStartLocation == -1 || emojiSentimentScoreStartLocation == -1 ) {
+            totalSentimentValue = "-2";
+            textSentimentValue =  "-2";
+            emojiSentimentValue = "-2"; 
+        } else {
+            totalSentimentValue = currentLine.substring(totalSentimentScoreStartLocation + 28, totalSentimentScoreEndLocation-1);
+            textSentimentValue = currentLine.substring(textSentimentScoreStartLocation + 27 , textSentimentScoreEndLocation-1);
+            emojiSentimentValue = currentLine.substring(emojiSentimentScoreStartLocation + 23 , emojiSentimentScoreEndLocation); 
+
+            if (totalSentimentValue.equals("null")) {
+                totalSentimentValue = "";
+            }
+            if (textSentimentValue.equals("null")) {
+                textSentimentValue = "";
+            }
+            if (emojiSentimentValue.equals("null")) {
+                emojiSentimentValue = "";
+            }
+        }
+    }
+
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -168,6 +263,12 @@ public class TweetStatus extends javax.swing.JPanel {
         screenname_r = new javax.swing.JLabel();
         profile_r = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
+        totScoreLabel = new javax.swing.JLabel();
+        emojiScoreLabel = new javax.swing.JLabel();
+        textScoreLabel = new javax.swing.JLabel();
+        totScore = new javax.swing.JLabel();
+        emojiScore = new javax.swing.JLabel();
+        textScore = new javax.swing.JLabel();
 
         setBackground(new java.awt.Color(255, 255, 255));
 
@@ -229,6 +330,19 @@ public class TweetStatus extends javax.swing.JPanel {
         FlowLayout flow = new FlowLayout(FlowLayout.LEADING);
         jPanel1.setLayout(flow);
 
+        totScoreLabel.setText("Total");
+        totScoreLabel.setName(""); // NOI18N
+
+        emojiScoreLabel.setText("Emoji");
+        emojiScoreLabel.setName(""); // NOI18N
+
+        textScoreLabel.setText("Text");
+        textScoreLabel.setName(""); // NOI18N
+
+        emojiScore.setName("emojiScore"); // NOI18N
+
+        textScore.setName("textScore"); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -252,8 +366,22 @@ public class TweetStatus extends javax.swing.JPanel {
                         .addComponent(date)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(Location))
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(56, Short.MAX_VALUE))
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 356, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(emojiScoreLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(emojiScore))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(totScoreLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(totScore))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(textScoreLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(textScore)))
+                .addContainerGap(39, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -269,9 +397,22 @@ public class TweetStatus extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(screenname)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(retweetPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(retweetPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(totScoreLabel)
+                        .addComponent(totScore)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(emojiScoreLabel)
+                            .addComponent(emojiScore, javax.swing.GroupLayout.Alignment.TRAILING))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(textScoreLabel)
+                            .addComponent(textScore))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(date)
@@ -283,6 +424,8 @@ public class TweetStatus extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     javax.swing.JLabel Location;
     javax.swing.JLabel date;
+    javax.swing.JLabel emojiScore;
+    javax.swing.JLabel emojiScoreLabel;
     javax.swing.JPanel jPanel1;
     javax.swing.JLabel profile;
     javax.swing.JLabel profile_r;
@@ -290,6 +433,10 @@ public class TweetStatus extends javax.swing.JPanel {
     javax.swing.JPanel retweetPanel;
     javax.swing.JLabel screenname;
     javax.swing.JLabel screenname_r;
+    javax.swing.JLabel textScore;
+    javax.swing.JLabel textScoreLabel;
+    javax.swing.JLabel totScore;
+    javax.swing.JLabel totScoreLabel;
     javax.swing.JLabel twicon;
     javax.swing.JLabel username;
     javax.swing.JLabel username_r;

@@ -5,8 +5,12 @@
  */
 package PiechartUI;
 
+import displaytweets.FilteredResultsDisplay;
+import displaytweets.SearchGUI;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.io.File;
+import java.util.ArrayList;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -35,10 +39,18 @@ public class PieChartUI extends JApplet {
     private static final int JFXPANEL_WIDTH_INT = 500;
     private static final int JFXPANEL_HEIGHT_INT = 520;
     private static JFXPanel fxContainer;
-
+    private ArrayList<File> negList;
+    private ArrayList<File> neutList;
+    private ArrayList<File> posList;
+    
+    public FilteredResultsDisplay negFrame;
+    public FilteredResultsDisplay neutFrame;
+    public FilteredResultsDisplay posFrame;
+    
     /**
      * @param args the command line arguments
      */
+/*
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             
@@ -66,11 +78,17 @@ public class PieChartUI extends JApplet {
             }
         });
     }
+*/    
     
     
-    
-    @Override
-    public void init() {
+    public void init(ArrayList<File> ngList,ArrayList<File> ntList,ArrayList<File> pList) {
+        negList = ngList;
+        neutList = ntList;
+        posList = pList;
+        negFrame = null;
+        neutFrame = null;
+        posFrame = null;
+        
         fxContainer = new JFXPanel();
         fxContainer.setPreferredSize(new Dimension(JFXPANEL_WIDTH_INT, JFXPANEL_HEIGHT_INT));
         add(fxContainer, BorderLayout.CENTER);
@@ -90,12 +108,12 @@ public class PieChartUI extends JApplet {
     private void createScene() {
         
         StackPane root = new StackPane();
- 
+        int totalTweets = negList.size() + neutList.size() + posList.size();
         ObservableList<PieChart.Data> pieChartData =
                 FXCollections.observableArrayList(
-                new PieChart.Data("Negative: "/* + number of neg. tweets/total tweets */, 13),
-                new PieChart.Data("Neutral: "/* + number of neutral tweets/total tweets */, 25),
-                new PieChart.Data("Positive: "/* + number of pos. tweets/total tweets */, 10));
+                new PieChart.Data("Negative: " + (double) negList.size()/totalTweets*100 + "%", negList.size()),
+                new PieChart.Data("Neutral: " + (double) neutList.size()/totalTweets*100 + "%", neutList.size()),
+                new PieChart.Data("Positive: " + (double) posList.size()/totalTweets*100 + "%", posList.size()));
         final PieChart chart = new PieChart(pieChartData);
         chart.setTitle("Sentiment Analysis");        
         root.getChildren().add(chart);
@@ -103,25 +121,32 @@ public class PieChartUI extends JApplet {
         //Panel
         fxContainer.setScene(new Scene(root));
         
+        
         for (final PieChart.Data data : chart.getData()) {
-            data.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED,
-            new EventHandler<MouseEvent>() {
-                @Override public void handle(MouseEvent e) {
-            
-                    switch(data.getName()){
-                        case "Negative: " /* + number of neg. tweets/total tweets */: 
-                            System.out.print("Negative: \n"+String.valueOf(data.getPieValue()/* divide by total tweets ) + "%"*/)); 
-                            break;
-                            
-                        case "Neutral: " /* + number of neutral tweets/total tweets */: 
-                            System.out.print("Neutral: \n"+String.valueOf(data.getPieValue()/* divide by total tweets ) + "%"*/));
-                            break;
-                            
-                        case "Positive: " /* + number of neg. tweets/total tweets */: 
-                            System.out.print("Positive: \n"+String.valueOf(data.getPieValue()/* divide by total tweets ) + "%"*/));
-                            break;
+            data.getNode().addEventHandler(MouseEvent.MOUSE_PRESSED, (MouseEvent e) -> {
+                if (data.getName().equals("Negative: " + (double) negList.size()/totalTweets*100 + "%")) {
+                    System.out.print("Negative: \n"+String.valueOf(data.getPieValue() + "\n"/* divide by total tweets ) + "%"*/));
+                    // ((SearchGUI) getRootPane().getParent()).setFilteredList(new ArrayList<File>());
+                    if(negFrame == null) {
+                        negFrame = new FilteredResultsDisplay(negList, this);
+                        negFrame.setTitle("Negative Tweets");
+                        negFrame.setVisible(true);
                     }
-                 }
+                } else if (data.getName().equals("Neutral: " + (double) neutList.size()/totalTweets*100 + "%")) {
+                    System.out.print("Neutral: \n"+String.valueOf(data.getPieValue() + "\n"/* divide by total tweets ) + "%"*/));
+                    if(neutFrame == null) {
+                        neutFrame = new FilteredResultsDisplay(neutList, this);
+                        neutFrame.setTitle("Neutral Tweets");
+                        neutFrame.setVisible(true);
+                    }
+                } else if (data.getName().equals("Positive: " + (double) posList.size()/totalTweets*100 + "%")) {
+                    System.out.print("Positive: \n"+String.valueOf(data.getPieValue() + "\n"/* divide by total tweets ) + "%"*/));
+                    if(posFrame == null) {
+                        posFrame = new FilteredResultsDisplay(posList, this);
+                        posFrame.setTitle("Positive Tweets");
+                        posFrame.setVisible(true);
+                    }
+                }
             });
         }
     }

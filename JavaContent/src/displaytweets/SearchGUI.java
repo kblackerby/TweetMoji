@@ -15,13 +15,13 @@ import org.apache.lucene.queryparser.classic.ParseException;
 
 import query.SimpleQueryHolder;
 import searchers.EmbeddedSearcher;
+import UnicodeConverter.UnicodeConverter;
+import PiechartUI.PieChartUI;
+import java.awt.BorderLayout;
 
 import twitter4j.Status;
 import twitter4j.TwitterException;
 import twitter4j.TwitterObjectFactory;
-
-import UnicodeConverter.UnicodeConverter;
-import java.util.Arrays;
 
 /**
  *
@@ -99,6 +99,9 @@ public class SearchGUI extends javax.swing.JFrame {
         backToSearch = new javax.swing.JButton();
         clearFiltersButton = new javax.swing.JButton();
         pieChartButton = new javax.swing.JButton();
+        piePanel = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        piePane = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new java.awt.CardLayout());
@@ -241,7 +244,7 @@ public class SearchGUI extends javax.swing.JFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel1)
                     .addComponent(emojiScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(42, Short.MAX_VALUE))
+                .addContainerGap(45, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -280,7 +283,7 @@ public class SearchGUI extends javax.swing.JFrame {
                         .addComponent(jLabel1)
                         .addGap(11, 11, 11)
                         .addComponent(emojiScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 276, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(33, Short.MAX_VALUE))
+                .addContainerGap(61, Short.MAX_VALUE))
         );
 
         searchScrollPane.setViewportView(jPanel2);
@@ -289,12 +292,12 @@ public class SearchGUI extends javax.swing.JFrame {
         searchPanel.setLayout(searchPanelLayout);
         searchPanelLayout.setHorizontalGroup(
             searchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(searchScrollPane)
+            .addComponent(searchScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 634, Short.MAX_VALUE)
         );
         searchPanelLayout.setVerticalGroup(
             searchPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(searchPanelLayout.createSequentialGroup()
-                .addComponent(searchScrollPane)
+                .addComponent(searchScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 372, Short.MAX_VALUE)
                 .addGap(0, 0, 0))
         );
 
@@ -368,14 +371,14 @@ public class SearchGUI extends javax.swing.JFrame {
                 .addGroup(resultPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(pieChartButton)
                     .addComponent(clearFiltersButton))
-                .addContainerGap(39, Short.MAX_VALUE))
+                .addContainerGap(44, Short.MAX_VALUE))
         );
         resultPaneLayout.setVerticalGroup(
             resultPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, resultPaneLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(resultPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 273, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 310, Short.MAX_VALUE)
                     .addGroup(resultPaneLayout.createSequentialGroup()
                         .addComponent(pieChartButton)
                         .addGap(18, 18, 18)
@@ -397,18 +400,34 @@ public class SearchGUI extends javax.swing.JFrame {
         resultPanel.setLayout(resultPanelLayout);
         resultPanelLayout.setHorizontalGroup(
             resultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 631, Short.MAX_VALUE)
+            .addGap(0, 636, Short.MAX_VALUE)
             .addGroup(resultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addComponent(resultsScrollPane, javax.swing.GroupLayout.Alignment.TRAILING))
         );
         resultPanelLayout.setVerticalGroup(
             resultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 344, Short.MAX_VALUE)
+            .addGap(0, 381, Short.MAX_VALUE)
             .addGroup(resultPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addComponent(resultsScrollPane, javax.swing.GroupLayout.Alignment.TRAILING))
         );
 
-        getContentPane().add(resultPanel, "card4");
+        getContentPane().add(resultPanel, "resultsCard");
+
+        piePane.setLayout(new java.awt.BorderLayout());
+        jScrollPane1.setViewportView(piePane);
+
+        javax.swing.GroupLayout piePanelLayout = new javax.swing.GroupLayout(piePanel);
+        piePanel.setLayout(piePanelLayout);
+        piePanelLayout.setHorizontalGroup(
+            piePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 591, Short.MAX_VALUE)
+        );
+        piePanelLayout.setVerticalGroup(
+            piePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane1)
+        );
+
+        getContentPane().add(piePanel, "pieCard");
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -439,9 +458,9 @@ public class SearchGUI extends javax.swing.JFrame {
     }
     
     // Change to next screen
-    private void changeCard() {
+    private void changeCard(String card) {
         CardLayout cl = (CardLayout) getContentPane().getLayout();
-        cl.next(getContentPane());
+        cl.show(getContentPane(), card);
     }
     
 
@@ -591,18 +610,20 @@ public class SearchGUI extends javax.swing.JFrame {
         ArrayList selectedEmojis = new ArrayList<>();
         buttonList.stream().forEach((EmojiButton b) -> {
             if(b.isSelected()) {
+                ArrayList emoji = new ArrayList<>();
                 String[] result32 = b.getImgName().split("U");
                 for(String r : result32) {
                     if (!r.isEmpty()) {
                         String results16 = UnicodeConverter.convert32to16(r.replace("+","0x"));
-                        
+                        System.out.println(results16);
                         for (int i = 0; i < results16.length(); i++) {
-                            selectedEmojis.add(results16.charAt(i));
+                            emoji.add(results16.charAt(i));
                         }
                     }
                 }
+                selectedEmojis.add(emoji);
             }
-            });
+        });
         
         // Search if the input is all valid
         if(!errorLabel.isShowing()) {
@@ -632,7 +653,7 @@ public class SearchGUI extends javax.swing.JFrame {
             // Change the screen if tweets exist, display "No Results" if not
             if ( fileList.size() > 0) {
                 setTweetList(fileList);
-                changeCard();
+                changeCard("resultsCard");
             } else {
                 noResultsLabel.setVisible(true);
             }
@@ -655,36 +676,54 @@ public class SearchGUI extends javax.swing.JFrame {
     
     private ArrayList<File> tweetList; // list of files to be displayed
     private ArrayList<File> filteredList;
-    
+    private boolean filtSel;
     private final int pageLen; // length of pages (number of tweets in a page)
     private int pageNum; // currently displayed page
+    
     // Show last set of tweets
     private void previousButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_previousButtonMouseClicked
         if (pageNum > 0) {
             pageNum--;
-            UpdateDisplay();
+            if (filtSel)
+                UpdateFilterDisplay();
+            else
+                UpdateDisplay();
         }
     }//GEN-LAST:event_previousButtonMouseClicked
     // Show desired set of tweets
     private void goButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goButtonActionPerformed
         pageNum = pageSelect.getSelectedIndex();
-        UpdateDisplay();
+        if (filtSel)
+                UpdateFilterDisplay();
+            else
+                UpdateDisplay();
     }//GEN-LAST:event_goButtonActionPerformed
     // Show next set of tweets
     private void nextButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_nextButtonMouseClicked
         if ((pageNum+1) * pageLen < tweetList.size()) {
             pageNum++;
-            UpdateDisplay();
+            if (filtSel)
+                UpdateFilterDisplay();
+            else
+                UpdateDisplay();
         }
     }//GEN-LAST:event_nextButtonMouseClicked
     // Clear the search parameters and switch screen
     private void backToSearchMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_backToSearchMouseClicked
         clearLastSearch();
-        changeCard();
+        changeCard("searchCard");
     }//GEN-LAST:event_backToSearchMouseClicked
     
     private void pieChartButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pieChartButtonMouseClicked
-        // TODO add your handling code here:
+        PieChartUI applet = new PieChartUI();
+        applet.init(simpleQueryObject.getTotalNegativeSet(),
+                    simpleQueryObject.getTotalNeutralSet(),
+                    simpleQueryObject.getTotalPositiveSet());
+        // Making it display
+        piePane.add(applet);
+        // piePane.add(applet, BorderLayout.WEST);
+        piePanel.revalidate();
+        changeCard("pieCard");      
     }//GEN-LAST:event_pieChartButtonMouseClicked
 
     private void clearFiltersButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_clearFiltersButtonMouseClicked
@@ -695,6 +734,7 @@ public class SearchGUI extends javax.swing.JFrame {
     public void setTweetList(ArrayList<File> tweets) {
         // Set the tweet files to show
         tweetList = tweets;
+        filtSel = false;
         // Set the page dropdown to number of pages
         String[] pages = new String[(int)Math.ceil((double)tweetList.size()/pageLen)];
         for (int i = 0; i < Array.getLength(pages); i++) {
@@ -708,14 +748,13 @@ public class SearchGUI extends javax.swing.JFrame {
     private void UpdateDisplay() {
         // clear panel of previous page (if applicable)
         tweetPanel.removeAll();
-        
+        pageSelect.setSelectedIndex(pageNum);
         try {
         // Iterate through the files, displaying the tweets
             for (int i = pageLen * pageNum; i < Integer.min((pageNum+1)*pageLen, tweetList.size());i++) {
                 // Create Status Object from the file and add to panel
-                String rawJSON = readFirstLine(tweetList.get(i));
-                Status tweet = TwitterObjectFactory.createStatus(rawJSON);              
-                TweetStatus stat = new TweetStatus(tweet);
+                String rawJSON = readFirstLine(tweetList.get(i));              
+                TweetStatus stat = new TweetStatus(rawJSON);
                 tweetPanel.add(stat);
             }
             // make changes visible
@@ -723,15 +762,13 @@ public class SearchGUI extends javax.swing.JFrame {
           // Exceptions if errors in getting tweets
         } catch (IOException ioe) {
             System.out.println("Failed to store tweets: " + ioe.getMessage());
-        } catch (TwitterException te) {
-            System.out.println("Failed to get timeline: " + te.getMessage());
-            System.exit(-1);
         }
     }
     // Set the list of filtered tweet files and update the display to show them
-        public void setFilteredList(ArrayList<File> tweets) {
+    public void setFilteredList(ArrayList<File> tweets) {
         // Set the tweet files to show
         filteredList = tweets;
+        filtSel = true;
         // Set the page dropdown to number of pages
         String[] pages = new String[(int)Math.ceil((double)filteredList.size()/pageLen)];
         for (int i = 0; i < Array.getLength(pages); i++) {
@@ -745,14 +782,13 @@ public class SearchGUI extends javax.swing.JFrame {
     private void UpdateFilterDisplay() {
         // clear panel of previous page (if applicable)
         tweetPanel.removeAll();
-        
+        pageSelect.setSelectedIndex(pageNum);
         try {
         // Iterate through the files, displaying the tweets
             for (int i = pageLen * pageNum; i < Integer.min((pageNum+1)*pageLen, filteredList.size());i++) {
                 // Create Status Object from the file and add to panel
                 String rawJSON = readFirstLine(filteredList.get(i));
-                Status tweet = TwitterObjectFactory.createStatus(rawJSON);              
-                TweetStatus stat = new TweetStatus(tweet);
+                TweetStatus stat = new TweetStatus(rawJSON);
                 tweetPanel.add(stat);
             }
             // make changes visible
@@ -760,9 +796,6 @@ public class SearchGUI extends javax.swing.JFrame {
           // Exceptions if errors in getting tweets
         } catch (IOException ioe) {
             System.out.println("Failed to store tweets: " + ioe.getMessage());
-        } catch (TwitterException te) {
-            System.out.println("Failed to get timeline: " + te.getMessage());
-            System.exit(-1);
         }
     }
     
@@ -799,6 +832,8 @@ public class SearchGUI extends javax.swing.JFrame {
         }
     }
     
+    
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel TotalSentimentLabel;
     private javax.swing.JPanel advSearchPanel;
@@ -817,6 +852,7 @@ public class SearchGUI extends javax.swing.JFrame {
     private javax.swing.JTextField incKeywords;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel keywordLabel;
     private javax.swing.JTextField maxEmojiScore;
@@ -829,6 +865,8 @@ public class SearchGUI extends javax.swing.JFrame {
     private javax.swing.JLabel noResultsLabel;
     private javax.swing.JComboBox<String> pageSelect;
     private javax.swing.JButton pieChartButton;
+    private javax.swing.JPanel piePane;
+    private javax.swing.JPanel piePanel;
     private javax.swing.JButton previousButton;
     private javax.swing.JPanel resultPane;
     private javax.swing.JPanel resultPanel;
