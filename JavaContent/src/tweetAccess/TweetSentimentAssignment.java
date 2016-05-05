@@ -21,7 +21,7 @@ public class TweetSentimentAssignment {
 
     private static  String[] fileList(String directory){
         FileValidation fileValidation = new FileValidation();
-        ArrayList<File> fileArrayList = fileValidation.listTweetsInDirectory(directory);
+        ArrayList<File> fileArrayList = fileValidation.listJSONFilesInDirectory(directory);
         String[] fileName = new String[fileArrayList.size()];
         for(int i = 0; i <fileArrayList.size(); i++) {
             fileName[i] = fileArrayList.get(i).getPath();
@@ -182,16 +182,16 @@ public class TweetSentimentAssignment {
         String[] fileList = fileList(tweetDir);
 
         //Test sentiment Assignment
-        /*String tweetDir2 = baseDir + "\\resources\\sampleTweet.json";
+        String tweetDir2 = baseDir + "\\resources\\sampleTweet.json";
         try {
             insertTweetSentimentAndEmoji(tweetDir2);
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ParseException e) {
             e.printStackTrace();
-        }*/
+        }
 
-        for (String val :
+        /*for (String val :
                 fileList) {
             try {
                 insertTweetSentimentAndEmoji(val);
@@ -203,7 +203,7 @@ public class TweetSentimentAssignment {
                 e.printStackTrace();
             }
             System.out.println(val);
-        }
+        }*/
         long lEndTime = new Date().getTime();
 
         long difference = lEndTime - lStartTime;

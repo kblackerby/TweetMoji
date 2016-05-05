@@ -14,9 +14,10 @@ import java.util.regex.Pattern;
 
 /**
  * Created by Bukunmi on 4/2/2016.
+ * Inspired by http://rahular.com/twitter-sentiment-analysis/
  */
-public class SentimentRankAssignement {
-    static StanfordCoreNLP pipeline;
+public class SentimentRankAssignment {
+    private static StanfordCoreNLP pipeline;
 
     public static void init() {
         Properties props = new Properties();
@@ -57,7 +58,8 @@ public class SentimentRankAssignement {
         return mainSentiment;
     }
 
-    //Due to irregularities with the removeURL in the TeetsentimentAssignmet, the remove url is now working here, it remover all string that atarts with Http or other internet protocols
+    //Due to irregularities with the removeURL in the TweetSentimentAssignment, the remove url is now working here,
+    // it remover all string that atarts with Http or other internet protocols
     private static String removeUrl(String inputCode) {
         inputCode = inputCode.replaceAll("\\p{Punct}", "");
         String urlPattern = "((https?|ftp|gopher|telnet|file|Unsure|http)[\\w]+)";

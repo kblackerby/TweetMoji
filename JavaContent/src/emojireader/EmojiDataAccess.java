@@ -45,7 +45,7 @@ public class EmojiDataAccess {
         String emojiPicList = emojiPicFiles +"\\listOf\\collectedEmojis.txt";
 
         FileValidation fileValidation = new FileValidation();
-        ArrayList<File> emojiPics = fileValidation.listFileInDirectory(emojiPicFiles);
+        ArrayList<File> emojiPics = fileValidation.listJPEGFileInDirectory(emojiPicFiles);
 
         for (int i = duplicateDataArrayList.size() - 1; i >= 0; i--) {
             if (duplicateDataArrayList.size() == i){
